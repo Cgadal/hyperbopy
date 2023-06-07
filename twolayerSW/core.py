@@ -53,24 +53,23 @@ def Spsi_int_func(W_int, g, r):
     return np.array([np.zeros_like(l), np.zeros_like(l), np.zeros_like(l), -l])
 
 
-# def B_func(W_int, g, r):
+# def B_func(W, W_int, g, r):
 #     l = (g/2)*(W_int[0, 1, 1:] + W_int[0, 0, :-1]
 #                + W_int[2, 1, 1:] + W_int[2, 0, :-1])*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
 #     return np.array([np.zeros_like(l), l, np.zeros_like(l), -r*l])
 
-
-# def S_func(W_int, g, r):
+# def S_func(W, W_int, g, r):
 #     l = (g/2)*(r*(W_int[0, 1, 1:] + W_int[0, 0, :-1])
 #                + W_int[2, 1, 1:] + W_int[2, 0, :-1])*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
 #     return np.array([np.zeros_like(l), np.zeros_like(l), np.zeros_like(l), -l])
 
+
 def B_func(W, W_int, g, r):
-    l = (g/2)*(W[0, 1:-1] + W[2, 1:-1])*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
+    l = g*(W[0, 1:-1] + W[2, 1:-1])*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
     return np.array([np.zeros_like(l), l, np.zeros_like(l), -r*l])
 
-
 def S_func(W, W_int, g, r):
-    l = (g/2)*(r*W[0, 1:-1] + W[2, 1:-1]) * \
+    l = g*(r*W[0, 1:-1] + W[2, 1:-1]) * \
         (W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
     return np.array([np.zeros_like(l), np.zeros_like(l), np.zeros_like(l), -l])
 
@@ -147,5 +146,6 @@ def temporalStep(W, g, r, dx, theta):
     Bpsi_int, Spsi_int = Bpsi_int_func(W_int, g, r), Spsi_int_func(W_int, g, r)
     B, S = B_func(W, W_int, g, r), S_func(W, W_int, g, r)
     RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, A_int)
+    # breakpoint()
     # #### Computing right hand side
     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
