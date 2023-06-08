@@ -16,7 +16,7 @@ theta = 1
 
 # ## Initial condition
 # Bottom topography
-Z = 0*x
+Z = np.ones_like(x)
 
 # layer 1 (upper)
 h1 = H*np.ones_like(x)
@@ -31,4 +31,4 @@ W0 = np.array([h1, q1, w, q2, Z])
 
 # %% Run model
 run_model(W0, Nt, dx, g=9.81, r=1.2, plot_fig=True,
-            dN_fig=100, x=x, Z=Z, theta=theta)
+          dN_fig=100, x=x, Z=Z, theta=theta)
