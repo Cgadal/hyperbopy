@@ -1,7 +1,6 @@
 import numpy as np
 from twolayerSW.core import temporalStep
 import matplotlib.pyplot as plt
-from scipy.integrate import solve_ivp
 
 
 def update_step(W, g, r, dx, theta, dt_fact):

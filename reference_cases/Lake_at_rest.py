@@ -6,8 +6,8 @@ L = 3     # domain length [m]
 H = 3   # water height [m]
 
 # ## Grid parameters
-Nt = 2000  # time steps number
-Nx = 4000  # spatial grid points number (evenly spaced)
+Nt = 1000  # time steps number
+Nx = 500  # spatial grid points number (evenly spaced)
 x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
 
