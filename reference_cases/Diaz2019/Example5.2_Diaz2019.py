@@ -5,7 +5,7 @@ from twolayerSW.model import run_model
 
 # Spatial grid
 Nx = 400
-x = np.linspace(-5, 5, 400)
+x = np.linspace(-5, 5, Nx)
 dx = np.diff(x)[0]
 
 # initial conditions
