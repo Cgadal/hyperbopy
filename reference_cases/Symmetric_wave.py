@@ -42,5 +42,5 @@ w = h2 + Z
 W0 = np.array([h1, q1, w, q2, Z])
 
 # %% Run model
-run_model(W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
-          dN_fig=100, x=x, Z=Z, theta=theta, dt_fact=0.5)
+U, t = run_model(W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
+                 dN_fig=100, x=x, Z=Z, theta=theta, dt_fact=0.5)
