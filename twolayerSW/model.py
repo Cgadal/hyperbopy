@@ -17,14 +17,16 @@ def update_step(W, g, r, dx, theta, dt_fact):
 
 
 def run_model(W0, tmax, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig=200,
-              dN_sampling=200, x=None, Z=None, dt_fact=0.5):
+              dt_save=None, x=None, Z=None, dt_fact=0.5):
+    if dt_save is None:
+        dt_save = tmax/100
     # Initialization
     W = np.copy(W0)
     t = 0  # time tracking
     Nt = 0  # time steps
     #
-    U_save = []
-    t_save = []
+    U_save = [W[:-1, :]]
+    t_save = [0]
     #
     if plot_fig:
         fig, axarr = plt.subplots(2, 1, constrained_layout=True, sharex=True)
@@ -52,7 +54,7 @@ def run_model(W0, tmax, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig=200,
         t += dt
         Nt += 1
         #
-        if (Nt % dN_sampling == 0):
+        if (t - t_save[-1]) >= dt_save:
             t_save.append(t)
             U_save.append(W[:-1, :])
         if plot_fig & (Nt % dN_fig == 0):

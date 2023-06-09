@@ -1,5 +1,6 @@
-from twolayerSW.model import run_model
 import numpy as np
+
+from twolayerSW.model import run_model
 
 # ## Domain size
 L = 3     # domain length [m]
@@ -26,8 +27,7 @@ q1 = np.zeros_like(x)
 h2 = np.ones_like(x)
 q2 = np.zeros_like(x)
 
-w = h2 + Z
-W0 = np.array([h1, q1, w, q2, Z])
+W0 = np.array([h1, q1, h2, q2, Z])
 
 # %% Run model
 U, t = run_model(W0, tmax, dx, g=9.81, r=1.2, plot_fig=True,
