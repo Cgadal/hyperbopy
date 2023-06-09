@@ -13,11 +13,13 @@ def update_step(W, g, r, dx, theta, dt_fact):
     W_up = np.array([W_next[0, 1], 0, W_next[2, 1], 0])
     W_down = np.array([W_next[0, -2], 0, W_next[2, -2], 0])
     W_next[:-1, 0], W_next[:-1, -1] = W_up, W_down
-    return W_next
+    return W_next, dt
 
 
-def run_model(W0, Nt, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig=200, x=None, Z=None, dt_fact=0.5):
+def run_model(W0, tmax, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig=200, x=None, Z=None, dt_fact=0.5):
     W = np.copy(W0)
+    t = 0  # time tracking
+    Nt = 0  # time steps
     #
     if plot_fig:
         fig, axarr = plt.subplots(2, 1, constrained_layout=True, sharex=True)
@@ -32,18 +34,21 @@ def run_model(W0, Nt, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig=200, x=N
         axarr[0].set_ylabel('h [m]')
         axarr[1].set_ylabel('u [m/s]')
     #
-    for n in range(Nt):
+    while t <= tmax:
         # # Computing RightHandSide
         # # # Euler in time
         # W = update_step(W, g, r, dx, theta, dt_fact)
         #
         # # (3, 3) eSSPRK(3,3)
-        w1 = update_step(W, g, r, dx, theta, dt_fact)
-        w2 = (3/4)*W + (1/4)*update_step(w1, g, r, dx, theta, dt_fact)
-        W = (1/3)*W + (2/3)*update_step(w2, g, r, dx, theta, dt_fact)
+        w1, dt = update_step(W, g, r, dx, theta, dt_fact)
+        w2 = (3/4)*W + (1/4)*update_step(w1, g, r, dx, theta, dt_fact)[0]
+        W = (1/3)*W + (2/3)*update_step(w2, g, r, dx, theta, dt_fact)[0]
         #
-        if plot_fig & (n % dN_fig == 0):
-            plt.suptitle('{:0d}'.format(n))
+        t += dt
+        Nt += 1
+        #
+        if plot_fig & (Nt % dN_fig == 0):
+            plt.suptitle('{:.1e} s, {:0d}'.format(t, Nt))
             h1.remove()
             w.remove()
             u1.remove()

@@ -7,7 +7,7 @@ L = 3   # domain length [m]
 Hmax = 5   # water height [m]
 
 # ## Grid parameters
-Nt = 2000  # time steps number
+tmax = 1  # s  max time
 Nx = 500  # spatial grid points number (evenly spaced)
 x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
@@ -42,5 +42,5 @@ w = h2 + Z
 W0 = np.array([h1, q1, w, q2, Z])
 
 # %% Run model
-run_model(W0, Nt, dx, g=9.81, r=0.7, plot_fig=True,
+run_model(W0, tmax, dx, g=9.81, r=0.7, plot_fig=True,
           dN_fig=100, x=x, Z=Z, theta=theta, dt_fact=0.5)
