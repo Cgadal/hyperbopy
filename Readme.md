@@ -6,9 +6,9 @@ In this project, we solve various types of shallow water equation systems using 
 
 <a id="2">[2]</a> Isherwood, L., Grant, Z. J., & Gottlieb, S. (2018). Strong stability preserving integrating factor Runge--Kutta methods. SIAM Journal on Numerical Analysis, 56(6), 3276-3307.
 
-# Models
+## Models
 
-## Two-layer shallow water (layerwise conservative)
+### Two-layer shallow water (layerwise conservative)
 
 We solve the two layer shallow water model:
 
