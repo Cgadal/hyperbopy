@@ -2,10 +2,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from shallowpy.models.twolayer_layerwise import temporalStep as temporalStep_2L_layerwise
+from shallowpy.models.onelayer_global import temporalStep as temporalStep_1L_global
+
+
+dic_models = {'2L_layerwise': temporalStep_2L_layerwise, 
+              '1L_global': temporalStep_1L_global}
 
 def finder(model):
-    if model == '2L_layerwise':
-        return temporalStep_2L_layerwise
+    if model in dic_models.keys():
+        return dic_models[model]
     else:
         raise ValueError("'{}' not recognised, check implemented models".format(model)) from None 
 
@@ -16,9 +21,9 @@ def update_step(temporalStep, W, g, r, dx, theta, dt_fact):
     #
     W_next = np.copy(W)
     W_next[:-1, 1:-1] = W[:-1, 1:-1] + dt*RHS
-    # boundary conditions
-    W_up = np.array([W_next[0, 1], 0, W_next[2, 1], 0])
-    W_down = np.array([W_next[0, -2], 0, W_next[2, -2], 0])
+    # boundary conditions (0 for q, reflective fo h)
+    W_up = np.hstack([np.array([W_next[2*i, 1], 0]) for i in range((W_next.shape[0] - 1)//2)])
+    W_down = np.hstack([np.array([W_next[2*i, -2], 0]) for i in range((W_next.shape[0] - 1)//2)])
     W_next[:-1, 0], W_next[:-1, -1] = W_up, W_down
     return W_next, dt
 
@@ -41,10 +46,7 @@ def run_model(model, W0, tmax, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig
         fig, axarr = plt.subplots(2, 1, constrained_layout=True, sharex=True)
         axarr[0].plot(x, Z, 'k')
         #
-        h2, = axarr[0].plot([], [])
-        h1, = axarr[0].plot([], [])
-        u1, = axarr[1].plot([], [])
-        u2, = axarr[1].plot([], [])
+        lines = [axarr[0].plot([], [])[0] for i in range(W.shape[0] - 1)]
         #
         axarr[1].set_xlabel('Horizontal coordinate [m]')
         axarr[0].set_ylabel('h [m]')
@@ -68,15 +70,17 @@ def run_model(model, W0, tmax, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig
             U_save.append(W[:-1, :])
         if plot_fig & (Nt % dN_fig == 0):
             plt.suptitle('{:.1e} s, {:0d}'.format(t, Nt))
-            h1.remove()
-            h2.remove()
-            u1.remove()
-            u2.remove()
-            #
-            h2, = axarr[0].plot(x, W[2, :] + W[-1, :], color='tab:orange')
-            h1, = axarr[0].plot(x, W[0, :] + W[2, :] +
-                                W[-1, :], color='tab:blue')
-            u1, = axarr[1].plot(x, W[1, :]/W[0, :], color='tab:blue')
-            u2, = axarr[1].plot(x, W[3, :]/W[0, :], color='tab:orange')
+            for l in lines:
+                l.remove()
+            lines = []
+            axarr[0].set_prop_cycle(None)
+            axarr[1].set_prop_cycle(None)
+            for i in range((W.shape[0] - 1)//2):
+            # q plots
+                h, = axarr[0].plot(x, np.sum(W[::-2, :][:2*(i+1), :], axis=0))
+                q, = axarr[1].plot(x, W[2*i + 1, :]/W[2*i, :])
+                #
+                lines.append(h)
+                lines.append(q)
             plt.pause(0.005)
     return np.array(U_save), np.array(t_save)

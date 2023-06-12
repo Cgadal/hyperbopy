@@ -20,9 +20,13 @@ dim(W_int) = (5, 2, Nx):
     - 2: [h1, q1, h2, q2, Z]
     - 2: [pos, min]
 
+REFERENCE: Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservative central-upwind schemes for nonconservative hyperbolic systems. ESAIM: Mathematical Modelling and Numerical Analysis, 53(3), 959-985.
+
 """
 
 import numpy as np
+
+from .general import H, RHSS_func, Variables_int
 
 # #### model specific functions
 
@@ -68,6 +72,7 @@ def Spsi_int_func(W_int, g, r):
 def Ainv_int_func(W_int, g, r):
     zero = np.zeros_like(W_int[0, 0, :])
     one = np.ones_like(W_int[0, 0, :])
+    #
     l1 = np.array([zero, 2/(g*(1-r)*(W_int[0, 0, :] + W_int[0, 1, :])),
                   zero, 2/(g*(r-1)*(W_int[2, 0, :] + W_int[2, 1, :]))])
     l2 = np.array([one, zero, zero, zero])
@@ -86,59 +91,7 @@ def LocalSpeeds(W_int, g, dx):
         (um - np.sqrt(g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
     return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
 
-# #### General functions
-
-
-def H(Fluxes, a_int, W_int, Ainv_int, Spsi_int):
-    #
-    return (a_int[0, :]*Fluxes[1, ...]
-            - a_int[1, :]*Fluxes[0, ...]
-            + a_int[0, :]*a_int[1, :]*(W_int[:-1, 0, :] - W_int[:-1, 1, :]
-                                       - np.einsum('ikj,kj -> ij', Ainv_int, Spsi_int))) / (a_int[0, :] - a_int[1, :])
-
-
-# def minmod(alpha, beta):
-#     return (np.sign(alpha) + np.sign(beta))/2 * np.min(np.array([np.abs(alpha), np.abs(beta)]), axis=0)
-
-
-# def Variables_int(var, dx):
-#     alpha = (var[:, 2:] - var[:, 1:-1])/dx
-#     beta = (var[:, 1:-1] - var[:, :-2])/dx
-#     var_x = minmod(alpha, beta)
-#     var_x = np.concatenate([(var[:, 1:2] - var[:, 0:1])/dx,
-#                             var_x,
-#                             (var[:, -1:] - var[:, -2:-1])/dx], axis=1)
-#     #
-#     var_m_int = var[:, 0:-1] + var_x[:, 0:-1]*dx/2
-#     var_p_int = var[:, 1:] - var_x[:, 1:]*dx/2
-#     return np.swapaxes(np.array([var_p_int, var_m_int]), 0, 1)
-
-
-def Variables_int(var, dx, theta):
-    # ##### Minmod limiter for interpolation
-    zk = np.array([theta*(var[:, 1:-1] - var[:, :-2]),
-                   (var[:, 2:] - var[:, :-2])/2,
-                   theta*(var[:, 2:] - var[:, 1:-1])])
-    A = np.array([np.min(zk, axis=0), np.max(zk, axis=0)])
-    var_x = np.concatenate([(var[:, 1:2] - var[:, 0:1]),
-                            A[0, ...]*(A[0, ...] > 0) +
-                            A[1, ...]*(A[1, ...] < 0),
-                            (var[:, -1:] - var[:, -2:-1])], axis=1)/dx
-    #
-    var_m_int = var[:, :-1] + var_x[:, :-1]*dx/2
-    var_p_int = var[:, 1:] - var_x[:, 1:]*dx/2
-    #
-    return np.swapaxes(np.array([var_p_int, var_m_int]), 0, 1)
-
-
-def RHSS_func(B, S, Bpsi_int, Spsi_int, a_int):
-    jump_part = (a_int[1, 1:]*(Bpsi_int[:, 1:] + Spsi_int[:, 1:])) / (a_int[0, 1:] - a_int[1, 1:]) - \
-        (a_int[0, :-1]*(Bpsi_int[:, :-1] + Spsi_int[:, :-1])) / \
-        (a_int[0, :-1] - a_int[1, :-1])
-    #
-    centered_part = - B - S
-    return centered_part + jump_part
-
+# #### Spatial discretization step
 
 def temporalStep(W, g, r, dx, theta):
     # Compute intercell variables
