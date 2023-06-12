@@ -1,7 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from twolayerSW.model import run_model
+from shallowpy import run_model
+
+model = '2L_layerwise'
 
 # Spatial grid
 Nx = 500
@@ -35,5 +37,5 @@ theta = 1
 tmax = 5
 
 # %% Run model
-U, t = run_model(W0, tmax, dx, g=9.81, r=rho_1/rho_2, plot_fig=True,
+U, t = run_model(model, W0, tmax, dx, g=9.81, r=rho_1/rho_2, plot_fig=True,
                  dN_fig=100, x=x, Z=Z, theta=theta, dt_fact=0.5)

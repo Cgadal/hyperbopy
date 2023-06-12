@@ -1,7 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from twolayerSW.model import run_model
+from shallowpy import run_model
+
 
 # Spatial grid
 Nx = 1000

@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-setup(name="twolayerSW",
+setup(name="shallowpy",
       packages=find_packages(),
       python_requires='>=3',
       install_requires=[

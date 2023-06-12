@@ -1,6 +1,6 @@
 import numpy as np
 
-from twolayerSW.model import run_model
+from shallowpy import run_model
 
 # ## Domain size
 L = 3   # domain length [m]
