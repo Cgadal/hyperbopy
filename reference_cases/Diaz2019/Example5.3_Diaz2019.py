@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 
 from shallowpy import run_model
 
+model = '2L_layerwise'
 
 # Spatial grid
 Nx = 1000
@@ -25,7 +26,7 @@ theta = 1
 tmax = 1
 
 # %% Run model
-U, t = run_model(W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
+U, t = run_model(model, W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
                  dN_fig=10, x=x, Z=Z, theta=theta, dt_fact=0.5)
 
 # %% plot final figure
