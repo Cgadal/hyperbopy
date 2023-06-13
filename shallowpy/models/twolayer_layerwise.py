@@ -93,6 +93,7 @@ def LocalSpeeds(W_int, g, dx):
 
 # #### Spatial discretization step
 
+
 def temporalStep(W, g, r, dx, theta):
     # Compute intercell variables
     W_int = Variables_int(W, dx, theta)
@@ -107,7 +108,5 @@ def temporalStep(W, g, r, dx, theta):
     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
     # Compute sources
     RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
-    # breakpoint()
-    # #### Computing right hand side
-    # return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
+    # Computing right hand side
     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax

@@ -33,51 +33,25 @@ from .general import H, RHSS_func, Variables_int
 
 def F(W_int, g, r):
     return np.swapaxes(
-        np.array([W_int[1, ...],
-                  W_int[1, ...]**2/W_int[0, ...] + (g/2)*W_int[0, ...]**2,
-                  W_int[3, ...],
-                  W_int[3, ...]**2/W_int[2, ...] + (g/2)*W_int[2, ...]**2,
+        np.array([W_int[0, ...]*W_int[1, ...],
+                  W_int[1, ...]**2/2 + g *
+                      (W_int[0, ...] + W_int[2, ...] + W_int[-1, ...]),
+                  W_int[2, ...]*W_int[3, ...],
+                  W_int[3, ...]**2/2 + g *
+                      (r*W_int[0, ...] + W_int[2, ...] + W_int[-1, ...]),
                   ]),
         0, 1)
-
-
-def B_func(W, W_int, g, r):
-    l1 = -g*W[0, 1:-1]*(W_int[2, 1, 1:] - W_int[2, 0, :-1])
-    l2 = -g*r*W[2, 1:-1]*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
-
-
-def S_func(W, W_int, g):
-    l1 = -g*W[0, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
-    l2 = -g*W[2, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
-
-
-def Bpsi_int_func(W_int, g, r):
-    l1 = -(g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
-        (W_int[2, 0, :] - W_int[2, 1, :])
-    l2 = -(g*r/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
-        (W_int[0, 0, :] - W_int[0, 1, :])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
-
-
-def Spsi_int_func(W_int, g, r):
-    l1 = -(g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
-        (W_int[-1, 0, :] - W_int[-1, 1, :])
-    l2 = -(g/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
-        (W_int[-1, 0, :] - W_int[-1, 1, :])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
 
 def Ainv_int_func(W_int, g, r):
     zero = np.zeros_like(W_int[0, 0, :])
     one = np.ones_like(W_int[0, 0, :])
     #
-    l1 = np.array([zero, 2/(g*(1-r)*(W_int[0, 0, :] + W_int[0, 1, :])),
-                  zero, 2/(g*(r-1)*(W_int[2, 0, :] + W_int[2, 1, :]))])
-    l2 = np.array([one, zero, zero, zero])
+    l1 = np.array(
+        [zero, one/(g*(1-r)), 2/((1-r)*(W_int[2, 0, :] + W_int[2, 1, :])), one/(g*(1-r))])
+    l2 = np.array([2/(W_int[0, 0, :] + W_int[0, 1, :]), zero, zero, zero])
     l3 = -l1
-    l4 = np.array([zero, zero, one, zero])
+    l4 = np.array([zero, zero, 2/(W_int[2, 0, :] + W_int[2, 1, :]), zero])
     return np.array([l1, l2, l3, l4])
 
 
@@ -101,14 +75,13 @@ def temporalStep(W, g, r, dx, theta):
     a_int, dtmax = LocalSpeeds(W_int, g, dx)
     # Compute intermediate matrices
     Ainv_int = Ainv_int_func(W_int, g, r)
-    Bpsi_int, Spsi_int = Bpsi_int_func(W_int, g, r), Spsi_int_func(W_int, g, r)
-    B, S = B_func(W, W_int, g, r), S_func(W, W_int, g)
+    B, S = np.zeros_like(W[:-1, 1:-1]), np.zeros_like(W[:-1, 1:-1])
+    Bpsi_int, Spsi_int = np.zeros_like(
+        W_int[:-1, 0, :]), np.zeros_like(W_int[:-1, 0, :])
     # Compute Fluxes
     Fluxes = F(W_int, g, r)
     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
     # Compute sources
-    RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
-    # breakpoint()
-    # #### Computing right hand side
-    # return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
-    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
+    # no sources
+    # Computing right hand side
+    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1]), dtmax
