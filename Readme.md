@@ -68,7 +68,8 @@ See reference examples.
 
 - **13/06/2023**:
   - changing repo organization to be able to select within system of equations
-  -  adding the globally conservative one-layer model
+  -  adding the globally conservative one-layer model (dam break shows Ritter solution)
+  -  adding the locally conservative one-layer model (dam break shows shock solution)
 
 - **09/06/2023**: First stable version with validated reference examples. So far, no shock for dam-break solution, which exhibits the Ritter solution.
   
