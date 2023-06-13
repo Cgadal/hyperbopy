@@ -1,7 +1,7 @@
 """
 Here we solve the following system of equations:
     - d[h]/dt + d[hu]/dx = 0
-    - d[u]/dt + d[g*(h + Z)]/dx = -u*d[u]/dx
+    - d[u]/dt + d[u**2/2 + g*(h + Z)]/dx = 0
 
 variables:
     - U  = [h, u]:
@@ -27,23 +27,13 @@ from .general import H, RHSS_func, Variables_int
 
 # #### model specific functions
 
+
 def F(W_int, g):
     return np.swapaxes(
         np.array([W_int[0, ...]*W_int[1, ...],
-                  g*(W_int[0, ...] + W_int[-1, ...]),
+                  W_int[1, ...]**2/2 + g*(W_int[0, ...] + W_int[-1, ...]),
                   ]),
         0, 1)
-
-
-def B_func(W, W_int):
-    l1 = -(1/2)*W[1, 1:-1]*(W_int[1, 1, 1:] - W_int[1, 0, :-1])
-    return np.array([np.zeros_like(l1), l1])
-
-
-def Bpsi_int_func(W_int):
-    l1 = -(1/2)*(W_int[1, 0, :] + W_int[1, 1, :]) * \
-        (W_int[1, 0, :] - W_int[1, 1, :])
-    return np.array([np.zeros_like(l1), l1])
 
 
 def Ainv_int_func(W_int, g):
@@ -72,12 +62,13 @@ def temporalStep(W, g, r, dx, theta, epsilon=1.e-15):
     a_int, dtmax = LocalSpeeds(W_int[0, ...], W_int[1, ...], g*(1-r), dx)
     # Compute intermediate matrices
     Ainv_int = Ainv_int_func(W_int, g*(1-r))
-    B, Bpsi_int = B_func(W, W_int), Bpsi_int_func(W_int)
-    S, Spsi_int = np.zeros_like(B), np.zeros_like(Bpsi_int)
+    B, S = np.zeros_like(W[:-1, 1:-1]), np.zeros_like(W[:-1, 1:-1])
+    Bpsi_int, Spsi_int = np.zeros_like(
+        W_int[:-1, 0, :]), np.zeros_like(W_int[:-1, 0, :])
     # Compute Fluxes
     Fluxes = F(W_int, g*(1-r))
-    H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
+    H_int = H(Fluxes, a_int, W_int, Ainv_int, Bpsi_int)
     # Compute sources
     RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
     # #### Computing right hand side
-    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
+    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + 0*RHSS), dtmax
