@@ -8,9 +8,21 @@ In this project, we solve various types of shallow water equation systems using 
 
 ## Models
 
+### One-layer shallow water (globally conservative)
+
+- `model = '1L_global'`
+
+```math
+\begin{aligned}
+(h)_{t} + (q)_{x} &= 0, \\
+(q)_{t} + \left(\frac{q^{2}}{h} + \frac{g}{2}h^{2}\right)_{x} &= -g h(Z)_{x}, \\
+\end{aligned}
+
+```
+
 ### Two-layer shallow water (layerwise conservative)
 
-We solve the two layer shallow water model:
+- `model = '2L_layerwise'`
 
 ```math
 \begin{aligned}
@@ -30,6 +42,10 @@ See reference examples.
 
 ## Changelog
 
-- 09/06/2023: First stable version with validated reference examples. So far, no shock for dam-break solution, which exhibits the Ritter solution.
+- **13/06/2023**:
+  - changing repo organization to be able to select within system of equations
+  -  adding the globally conservative one-layer model
+
+- **09/06/2023**: First stable version with validated reference examples. So far, no shock for dam-break solution, which exhibits the Ritter solution.
   
-- 07/06/2023: First commit
+- **07/06/2023**: First commit
