@@ -3,10 +3,12 @@ import numpy as np
 
 from shallowpy.models.twolayer_layerwise import temporalStep as temporalStep_2L_layerwise
 from shallowpy.models.onelayer_global import temporalStep as temporalStep_1L_global
+from shallowpy.models.onelayer_local import temporalStep as temporalStep_1L_local
 
 
 dic_models = {'2L_layerwise': temporalStep_2L_layerwise, 
-              '1L_global': temporalStep_1L_global}
+              '1L_global': temporalStep_1L_global,
+              '1L_local': temporalStep_1L_local}
 
 def finder(model):
     if model in dic_models.keys():
@@ -28,7 +30,7 @@ def update_step(temporalStep, W, g, r, dx, theta, dt_fact):
     return W_next, dt
 
 
-def run_model(model, W0, tmax, dx, g=9.81, r=1.2, theta=1, plot_fig=True, dN_fig=200,
+def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fig=200,
               dt_save=None, x=None, Z=None, dt_fact=0.5):
     if dt_save is None:
         dt_save = tmax/100

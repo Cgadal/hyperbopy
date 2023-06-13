@@ -8,6 +8,13 @@ In this project, we solve various types of shallow water equation systems using 
 
 ## Models
 
+- $h$: layer height
+- $u$: layer velocity
+- $q = hu$: layer discharge
+- $r = \rho_1/\rho_2$: layer density ratio ($r <=1$)
+
+with subscripts $1$ and $2$ denoting the upper light and lower heavy layers, respectively
+
 ### One-layer shallow water (globally conservative)
 
 - `model = '1L_global'`
@@ -15,7 +22,19 @@ In this project, we solve various types of shallow water equation systems using 
 ```math
 \begin{aligned}
 (h)_{t} + (q)_{x} &= 0, \\
-(q)_{t} + \left(\frac{q^{2}}{h} + \frac{g}{2}h^{2}\right)_{x} &= -g h(Z)_{x}, \\
+(q)_{t} + \left(\frac{q^{2}}{h} + \frac{g}{2}h^{2}\right)_{x} &= -g(1-r) h(Z)_{x}, \\
+\end{aligned}
+
+```
+
+### One-layer shallow water (locally conservative)
+
+- `model = '1L_local'`
+
+```math
+\begin{aligned}
+(h)_{t} + (hu)_{x} &= 0, \\
+(u)_{t} + g(1-r)\left(h + Z \right)_{x} &= -u(u)_{x}, \\
 \end{aligned}
 
 ```
@@ -33,11 +52,16 @@ In this project, we solve various types of shallow water equation systems using 
 \end{aligned}
 
 ```
-with subscripts $1$ and $2$ denoting the upper light and lower heavy layers, respectively, and $r = \rho_1/\rho_2$. 
 
 ## Usage
 
 See reference examples.
+
+## Installation
+
+- Clone or download this repository
+- `cd shallowpy`
+- `pip3 install -e ./`
 
 
 ## Changelog
