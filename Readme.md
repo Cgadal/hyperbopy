@@ -69,8 +69,8 @@ with subscripts $1$ and $2$ denoting the upper light and lower heavy layers, res
 ```math
 \begin{aligned}
 
-[h_{1}]_{t} + [q_{1}]_{x} &= 0, \\
-[h_{2}]_{t} + [q_{2}]_{x} &= 0, \\
+[h_{1}]_{t} + [h_{1}u_{1}]_{x} &= 0, \\
+[h_{2}]_{t} + [h_{2}u_{2}]_{x} &= 0, \\
 [u_{1}]_{t} + \left[\frac{u_{1}^{2}}{2} + g(h_{1} + h_{2} + Z)\right]_{x} &= 0, \\
 [u_{2}]_{t} + \left[\frac{u_{2}^{2}}{2} + g(rh_{1} + h_{2} + Z)\right]_{x} &= 0, \\
 
