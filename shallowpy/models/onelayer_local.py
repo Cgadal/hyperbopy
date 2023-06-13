@@ -69,6 +69,6 @@ def temporalStep(W, g, r, dx, theta, epsilon=1.e-15):
     Fluxes = F(W_int, g*(1-r))
     H_int = H(Fluxes, a_int, W_int, Ainv_int, Bpsi_int)
     # Compute sources
-    RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
+    # no sources here
     # #### Computing right hand side
-    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + 0*RHSS), dtmax
+    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1]), dtmax
