@@ -52,14 +52,7 @@ def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fi
     t_save = [0]
     #
     if plot_fig:
-        fig, axarr = plt.subplots(2, 1, constrained_layout=True, sharex=True)
-        axarr[0].plot(x, Z, 'k')
-        #
-        lines = [axarr[0].plot([], [])[0] for i in range(W.shape[0] - 1)]
-        #
-        axarr[1].set_xlabel('Horizontal coordinate [m]')
-        axarr[0].set_ylabel('h [m]')
-        axarr[1].set_ylabel('u [m/s]')
+        fig, axarr, lines = init_plot(W0, x)
     #
     while t <= tmax:
         # # Computing RightHandSide
@@ -81,17 +74,40 @@ def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fi
             U_save.append(W[:-1, :])
         if plot_fig & (Nt % dN_fig == 0):
             plt.suptitle('{:.1e} s, {:0d}'.format(t, Nt))
-            for l in lines:
-                l.remove()
-            lines = []
-            axarr[0].set_prop_cycle(None)
-            axarr[1].set_prop_cycle(None)
-            for i in range((W.shape[0] - 1)//2):
-                # q plots
-                h, = axarr[0].plot(x, np.sum(W[::-2, :][:2*(i+1), :], axis=0))
-                q, = axarr[1].plot(x, W[2*i + 1, :]/W[2*i, :])
-                #
-                lines.append(h)
-                lines.append(q)
-            plt.pause(0.005)
+            lines = update_plot(axarr, W, x, lines)
     return np.array(U_save), np.array(t_save)
+
+
+# %% plot functions
+
+color_cycle = plt.rcParams['axes.prop_cycle'].by_key()['color']
+
+
+def plot_allvar(axarr, W, x):
+    lines = [ax.plot(x, w, color=color)[0]
+             for ax, w, color in zip(axarr.flatten(), W, color_cycle)]
+    return lines
+
+
+def clearlines(lines):
+    for l in lines:
+        l.remove()
+
+
+def update_plot(axarr, W, x, lines):
+    clearlines(lines)
+    lines = plot_allvar(axarr, W, x)
+    plt.pause(0.005)
+    return lines
+
+
+def init_plot(W0, x):
+    fig, axarr = plt.subplots(
+        W0.shape[0], 1, constrained_layout=True, sharex=True)
+    #
+    axarr.flatten()[-1].set_xlabel('Horizontal coordinate [m]')
+    for i, ax in enumerate(axarr.flatten()):
+        ax.set_ylabel('W[{:0d}]'.format(i))
+    #
+    lines = plot_allvar(axarr, W0, x)
+    return fig, axarr, lines
