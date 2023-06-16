@@ -21,9 +21,10 @@ def finder(model):
             "'{}' not recognised, check implemented models".format(model)) from None
 
 
-def update_step(temporalStep, W, g, r, dx, theta, dt_fact):
+def update_step(temporalStep, W, g, r, dx, theta, dt_fact=0.5, dt=None):
     RHS, dtmax = temporalStep(W, g, r, dx, theta)
-    dt = dtmax*dt_fact
+    if dt is None:
+        dt = dtmax*dt_fact
     #
     W_next = np.copy(W)
     W_next[:-1, 1:-1] = W[:-1, 1:-1] + dt*RHS
@@ -68,9 +69,9 @@ def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fi
         # # (3, 3) eSSPRK(3,3)
         w1, dt = update_step(temporalStep, W, g, r, dx, theta, dt_fact)
         w2 = (3/4)*W + (1/4)*update_step(temporalStep,
-                                         w1, g, r, dx, theta, dt_fact)[0]
+                                         w1, g, r, dx, theta, dt=dt)[0]
         W = (1/3)*W + (2/3)*update_step(temporalStep,
-                                        w2, g, r, dx, theta, dt_fact)[0]
+                                        w2, g, r, dx, theta, dt=dt)[0]
         #
         t += dt
         Nt += 1
