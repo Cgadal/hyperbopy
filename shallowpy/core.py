@@ -5,23 +5,12 @@ from shallowpy.models.twolayer_layerwise import temporalStep as temporalStep_2L_
 from shallowpy.models.twolayer_local import temporalStep as temporalStep_2L_local
 from shallowpy.models.onelayer_global import temporalStep as temporalStep_1L_global
 from shallowpy.models.onelayer_local import temporalStep as temporalStep_1L_local
+from shallowpy.models.onelayer_nonhydro_global import temporalStep as temporalStep_1L_nonhydro_global
+#
+from shallowpy.models.onelayer_nonhydro_global import update_step as update_step_1L_nonhydro
 
 
-dic_models = {'2L_layerwise': temporalStep_2L_layerwise,
-              '2L_local': temporalStep_2L_local,
-              '1L_global': temporalStep_1L_global,
-              '1L_local': temporalStep_1L_local}
-
-
-def finder(model):
-    if model in dic_models.keys():
-        return dic_models[model]
-    else:
-        raise ValueError(
-            "'{}' not recognised, check implemented models".format(model)) from None
-
-
-def update_step(temporalStep, W, g, r, dx, theta, dt_fact=0.5, dt=None):
+def update_step_regular(temporalStep, W, g, r, dx, theta, dt_fact=0.5, dt=None):
     RHS, dtmax = temporalStep(W, g, r, dx, theta)
     if dt is None:
         dt = dtmax*dt_fact
@@ -37,11 +26,27 @@ def update_step(temporalStep, W, g, r, dx, theta, dt_fact=0.5, dt=None):
     return W_next, dt
 
 
+dic_models = {'2L_layerwise': [update_step_regular, temporalStep_2L_layerwise],
+              '2L_local': [update_step_regular, temporalStep_2L_local],
+              '1L_global': [update_step_regular, temporalStep_1L_global],
+              '1L_local': [update_step_regular, temporalStep_1L_local],
+              '1L_non_hydro_global': [update_step_1L_nonhydro, temporalStep_1L_nonhydro_global],
+              }
+
+
+def finder(model):
+    if model in dic_models.keys():
+        return dic_models[model]
+    else:
+        raise ValueError(
+            "'{}' not recognised, check implemented models".format(model)) from None
+
+
 def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fig=200,
-              dt_save=None, x=None, Z=None, dt_fact=0.5):
+              dt_save=None, x=None, Z=None, dt_fact=0.5, **kwargs):
     if dt_save is None:
         dt_save = tmax/100
-    temporalStep = finder(model)
+    update_step, temporalStep = finder(model)
     #
     # Initialization
     W = np.copy(W0)
@@ -60,11 +65,12 @@ def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fi
         # W = update_step(W, g, r, dx, theta, dt_fact)
         #
         # # (3, 3) eSSPRK(3,3)
-        w1, dt = update_step(temporalStep, W, g, r, dx, theta, dt_fact)
+        w1, dt = update_step(temporalStep, W, g, r, dx,
+                             theta, dt_fact, **kwargs)
         w2 = (3/4)*W + (1/4)*update_step(temporalStep,
-                                         w1, g, r, dx, theta, dt=dt)[0]
+                                         w1, g, r, dx, theta, dt=dt, **kwargs)[0]
         W = (1/3)*W + (2/3)*update_step(temporalStep,
-                                        w2, g, r, dx, theta, dt=dt)[0]
+                                        w2, g, r, dx, theta, dt=dt, **kwargs)[0]
         #
         t += dt
         Nt += 1

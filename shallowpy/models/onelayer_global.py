@@ -1,7 +1,7 @@
 """
 Here we solve the following system of equations:
     - d[h]/dt + d[q]/dx = 0
-    - d[q]/dt + d[q**2/h + (g/2)*h]/dx = -g*h*(d[Z]/dx)
+    - d[q]/dt + d[q**2/h + (g/2)*h**2]/dx = -g*h*(d[Z]/dx)
 
 variables:
     - U  = [h, q]:
@@ -24,6 +24,7 @@ import numpy as np
 from .general import H, RHSS_func, Variables_int
 
 # #### model specific functions
+
 
 def F(W_int, g):
     return np.swapaxes(
@@ -54,7 +55,7 @@ def Ainv_int_func(W_int, g):
 
 
 def reconstruct_u(W, epsilon):
-    return np.sqrt(2)*W[0, ...]*W[1, ...]/np.sqrt(W[0, ...]**4 
+    return np.sqrt(2)*W[0, ...]*W[1, ...]/np.sqrt(W[0, ...]**4
                                                   + np.max([W[0, ...]**4, epsilon*np.ones_like(W[0, ...])], axis=0))
 
 

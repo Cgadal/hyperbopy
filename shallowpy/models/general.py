@@ -5,12 +5,18 @@ General functions for the spatial discretization
 
 import numpy as np
 
-def H(Fluxes, a_int, W_int, Ainv_int, Spsi_int):
+
+def H(Fluxes, a_int, W_int, Ainv_int=None, Spsi_int=None):
     #
-    return (a_int[0, :]*Fluxes[1, ...]
-            - a_int[1, :]*Fluxes[0, ...]
-            + a_int[0, :]*a_int[1, :]*(W_int[:-1, 0, :] - W_int[:-1, 1, :]
-                                       - np.einsum('ikj,kj -> ij', Ainv_int, Spsi_int))) / (a_int[0, :] - a_int[1, :])
+    if (Ainv_int is None) | (Spsi_int is None):
+        return (a_int[0, :]*Fluxes[1, ...]
+                - a_int[1, :]*Fluxes[0, ...]
+                + a_int[0, :]*a_int[1, :]*(W_int[:-1, 0, :] - W_int[:-1, 1, :])) / (a_int[0, :] - a_int[1, :])
+    else:
+        return (a_int[0, :]*Fluxes[1, ...]
+                - a_int[1, :]*Fluxes[0, ...]
+                + a_int[0, :]*a_int[1, :]*(W_int[:-1, 0, :] - W_int[:-1, 1, :]
+                                           - np.einsum('ikj,kj -> ij', Ainv_int, Spsi_int))) / (a_int[0, :] - a_int[1, :])
 
 # def minmod(alpha, beta):
 #     return (np.sign(alpha) + np.sign(beta))/2 * np.min(np.array([np.abs(alpha), np.abs(beta)]), axis=0)
@@ -52,4 +58,3 @@ def RHSS_func(B, S, Bpsi_int, Spsi_int, a_int):
     #
     centered_part = - B - S
     return centered_part + jump_part
-
