@@ -78,8 +78,8 @@ class SW_1L_global(spatial_discretization):
 
     def LocalSpeeds(self, W_int, dx):
         # reconstruct u
-        u_int = reconstruct_u(W_int, self.epsilon)
-        # ensure consistancy among variables
+        u_int = reconstruct_u(W_int[0], W_int[1], self.epsilon)
+        # ensure consistency among variables
         W_int[1, ...] = u_int*W_int[0, ...]
         #
         ap_int = np.row_stack((u_int + np.sqrt(self.gprime*W_int[0, ...]),

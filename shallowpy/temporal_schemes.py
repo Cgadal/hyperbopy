@@ -17,7 +17,7 @@ def euler_step(model, W, dx, dt=None, **kwargs):
     return W_next, dt
 
 
-def Runge_kutta_step(model, W, dx):
+def Runge_kutta_step(model, W, dx, euler_step=euler_step):
     w1, dt = euler_step(model, W, dx)
     w2 = (3/4)*W + (1/4)*euler_step(model, w1, dx, dt=dt)[0]
     w_final = (1/3)*W + (2/3)*euler_step(model, w2, dx, dt=dt)[0]

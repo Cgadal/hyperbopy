@@ -80,4 +80,7 @@ default_pars = {
     'hmin': 1e-10,
     'epsilon': 1.e-15,
     'dt_fact': 0.5,
+    'pa': 0,
+    'a_M': 0,
+    'a_N': 0,
 }

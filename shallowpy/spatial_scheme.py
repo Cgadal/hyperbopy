@@ -34,18 +34,6 @@ class spatial_discretization(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def Ainv_int(self):
-        ...
-
-    @abc.abstractmethod
-    def Bpsi_int(self):
-        ...
-
-    @abc.abstractmethod
-    def Spsi_int(self):
-        ...
-
-    @abc.abstractmethod
     def S(self):
         ...
 
@@ -55,6 +43,18 @@ class spatial_discretization(abc.ABC):
 
     @abc.abstractmethod
     def F(self):
+        ...
+
+    @abc.abstractmethod
+    def Ainv_int(self):
+        ...
+
+    @abc.abstractmethod
+    def Bpsi_int(self):
+        ...
+
+    @abc.abstractmethod
+    def Spsi_int(self):
         ...
 
     # general functions
@@ -95,9 +95,27 @@ class spatial_discretization(abc.ABC):
                                                - np.einsum('ikj,kj -> ij', Ainv_int, Spsi_int))) / (a_int[0, :] - a_int[1, :])
 
 
-def reconstruct_u(W, epsilon):
-    return np.sqrt(2)*W[0, ...]*W[1, ...]/np.sqrt(W[0, ...]**4
-                                                  + np.max([W[0, ...]**4, epsilon*np.ones_like(W[0, ...])], axis=0))
+# #### Other usefull functions
+
+def reconstruct_u(h, u, epsilon):
+    return np.sqrt(2)*h*u/np.sqrt(h**4 + np.max([h**4, epsilon*np.ones_like(h)], axis=0))
+
+
+def minmod_diff(var, dx, theta):
+    # 1d vector
+    zk = np.array([theta*(var[1:-1] - var[:-2]),
+                   (var[2:] - var[:-2])/2,
+                   theta*(var[2:] - var[1:-1])])
+    A = np.array([np.min(zk, axis=0), np.max(zk, axis=0)])
+    var_x = np.concatenate([(var[1:2] - var[0:1]),
+                            A[0, ...]*(A[0, ...] > 0) +
+                            A[1, ...]*(A[1, ...] < 0),
+                            (var[-1:] - var[-2:-1])])/dx
+    return var_x
+
+
+def centered_diff(var, dx):
+    return np.concatenate([var[1:2] - var[0:1], (var[2:] - var[:-2])/2, (var[-1:] - var[-2:-1])])/dx
 
 
 # def temporalStep(W, g, r, dx, theta):
