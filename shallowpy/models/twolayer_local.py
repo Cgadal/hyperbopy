@@ -92,22 +92,3 @@ class SW_2L_local(spatial_discretization):
         am_int = np.row_stack(
             (um - np.sqrt(self.g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
         return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
-
-
-# def temporalStep(W, g, r, dx, theta):
-#     # Compute intercell variables
-#     W_int = Variables_int(W, dx, theta)
-#     # Compute Local speeds
-#     a_int, dtmax = LocalSpeeds(W_int, g, dx)
-#     # Compute intermediate matrices
-#     Ainv_int = Ainv_int_func(W_int, g, r)
-#     B, S = np.zeros_like(W[:-1, 1:-1]), np.zeros_like(W[:-1, 1:-1])
-#     Bpsi_int, Spsi_int = np.zeros_like(
-#         W_int[:-1, 0, :]), np.zeros_like(W_int[:-1, 0, :])
-#     # Compute Fluxes
-#     Fluxes = F(W_int, g, r)
-#     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
-#     # Compute sources
-#     # no sources
-#     # Computing right hand side
-#     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1]), dtmax

@@ -87,28 +87,3 @@ class SW_1L_global(spatial_discretization):
         am_int = np.row_stack((u_int - np.sqrt(self.gprime*W_int[0, ...]),
                                np.zeros_like(u_int[0, :]))).min(axis=0)
         return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
-
-
-# #### Spatial discretization step
-
-
-# def temporalStep(W, g, r, dx, theta, epsilon=1.e-15):
-#     # Compute intercell variables
-#     W_int = Variables_int(W, dx, theta)
-#     u_int = reconstruct_u(W_int, epsilon)
-#     W_int[1, ...] = u_int*W_int[0, ...]
-#     # Compute Local speeds
-#     a_int, dtmax = LocalSpeeds(W_int[0, ...], u_int, g*(1-r), dx)
-#     # Compute intermediate matrices
-#     Ainv_int = Ainv_int_func(W_int, g*(1-r))
-#     S, Spsi_int = S_func(W, W_int, g*(1-r)), Spsi_int_func(W_int, g*(1-r))
-#     B, Bpsi_int = np.zeros_like(S), np.zeros_like(Spsi_int)
-#     # Compute Fluxes
-#     Fluxes = F(W_int, g*(1-r))
-#     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
-#     # Compute sources
-#     RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
-#     # breakpoint()
-#     # #### Computing right hand side
-#     # return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
-#     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax

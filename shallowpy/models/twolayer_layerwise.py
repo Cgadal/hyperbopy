@@ -104,23 +104,3 @@ class SW_2L_layerwise(spatial_discretization):
         am_int = np.row_stack(
             (um - np.sqrt(self.g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
         return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
-
-# # #### Spatial discretization step
-
-
-# def temporalStep(W, g, r, dx, theta):
-#     # Compute intercell variables
-#     W_int = Variables_int(W, dx, theta)
-#     # Compute Local speeds
-#     a_int, dtmax = LocalSpeeds(W_int, g, dx)
-#     # Compute intermediate matrices
-#     Ainv_int = Ainv_int_func(W_int, g, r)
-#     Bpsi_int, Spsi_int = Bpsi_int_func(W_int, g, r), Spsi_int_func(W_int, g, r)
-#     B, S = B_func(W, W_int, g, r), S_func(W, W_int, g)
-#     # Compute Fluxes
-#     Fluxes = F(W_int, g, r)
-#     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
-#     # Compute sources
-#     RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
-#     # Computing right hand side
-#     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
