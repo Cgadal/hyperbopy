@@ -2,43 +2,41 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from shallowpy import run_model
-
-model = '1L_local'
+from shallowpy.models import SW_1L_local
 
 # ## Domain size
-L = 30   # domain length [m]
+L = 10   # domain length [m]
 
 # ## Grid parameters
-tmax = 5  # s  max time
+tmax = 2.5  # s  max time
 Nx = 1000  # spatial grid points number (evenly spaced)
 x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
-
-# ## Numerical parameters
-theta = 1
-
-# ## wave properties
-# window
-l0 = L/2
-h0 = 0.5
 
 # ## Initial condition
 # Bottom topography
 Z = 0*x
 
 # layer
-hmin = 1e-15
-h = hmin*np.ones_like(x) + np.where((x <= l0), h0, 0)  # window
-u = np.zeros_like(x)
+hmin = 1e-10
+l0 = 5
+h0 = 0.5
+#
+h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0)  # window
 
-W0 = np.array([h, u, Z])
+# velocity
+q = np.zeros_like(x)
+
+W0 = np.array([h, q, Z])
+
+# ## model instance initialization
+model = SW_1L_local()  # with default parameters
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, plot_fig=True,
-                 dN_fig=50, x=x, Z=Z, theta=theta, dt_fact=0.5)
-
+U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 # %% Compare with theory
+
 
 def theory(x, t, h0, l0, g=9.81, r=0.95):
     c0 = np.sqrt((1-r)*g*h0)

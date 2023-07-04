@@ -32,8 +32,8 @@ class SW_1L_global(spatial_discretization):
         self.g = g if g is not None else default_pars['g']
         self.r = r if r is not None else default_pars['r']
         self.theta = theta if theta is not None else default_pars['theta']
-        self.epsilon = epsilon if r is not None else default_pars['epsilon']
-        self.dt_fact = dt_fact if r is not None else default_pars['dt_fact']
+        self.epsilon = epsilon if epsilon is not None else default_pars['epsilon']
+        self.dt_fact = dt_fact if dt_fact is not None else default_pars['dt_fact']
         #
         self.gprime = self.g*(1 - self.r)
         self.vars = ['h', 'q', 'Z']

@@ -3,14 +3,12 @@ import numpy as np
 from shallowpy import run_model
 from shallowpy.models import SW_1L_global
 
-model = '1L_global'
-
 # ## Domain size
 L = 10   # domain length [m]
 
 # ## Grid parameters
 tmax = 2.5  # s  max time
-Nx = 1000  # spatial grid points number (evenly spaced)
+Nx = 500  # spatial grid points number (evenly spaced)
 x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
 
@@ -37,4 +35,4 @@ W0 = np.array([h, q, Z])
 model = SW_1L_global()  # with default parameters
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
+U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=100, x=x, Z=Z)

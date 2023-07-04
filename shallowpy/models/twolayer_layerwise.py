@@ -26,80 +26,86 @@ REFERENCE: Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservat
 
 import numpy as np
 
-from ..general import model
-
-# #### model specific functions
-
-
-def F(W_int, g, r):
-    return np.swapaxes(
-        np.array([W_int[1, ...],
-                  W_int[1, ...]**2/W_int[0, ...] + (g/2)*W_int[0, ...]**2,
-                  W_int[3, ...],
-                  W_int[3, ...]**2/W_int[2, ...] + (g/2)*W_int[2, ...]**2,
-                  ]),
-        0, 1)
+from shallowpy.core import default_pars
+from shallowpy.spatial_scheme import spatial_discretization
+from shallowpy.temporal_schemes import Runge_kutta_step
 
 
-def B(W, W_int, g, r):
-    l1 = -g*W[0, 1:-1]*(W_int[2, 1, 1:] - W_int[2, 0, :-1])
-    l2 = -g*r*W[2, 1:-1]*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
+class SW_2L_layerwise(spatial_discretization):
 
+    def __init__(self, g=None, r=None, theta=None, epsilon=None, dt_fact=None):
+        self.g = g if g is not None else default_pars['g']
+        self.r = r if r is not None else default_pars['r']
+        self.theta = theta if theta is not None else default_pars['theta']
+        self.epsilon = epsilon if epsilon is not None else default_pars['epsilon']
+        self.dt_fact = dt_fact if dt_fact is not None else default_pars['dt_fact']
+        #
+        self.vars = ['h1', 'q1', 'h2', 'q2', 'Z']
 
-def S(W, W_int, g):
-    l1 = -g*W[0, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
-    l2 = -g*W[2, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
+    # #### temporal discretization functions
 
+    def temporalstep(self, W, dx):
+        return Runge_kutta_step(self, W, dx)
 
-def Bpsi_int(W_int, g, r):
-    l1 = -(g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
-        (W_int[2, 0, :] - W_int[2, 1, :])
-    l2 = -(g*r/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
-        (W_int[0, 0, :] - W_int[0, 1, :])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
+    # #### spatial discretization functions
 
+    def F(self, W_int):
+        return np.swapaxes(
+            np.array([W_int[1, ...],
+                      W_int[1, ...]**2/W_int[0, ...] +
+                          (self.g/2)*W_int[0, ...]**2,
+                      W_int[3, ...],
+                      W_int[3, ...]**2/W_int[2, ...] +
+                          (self.g/2)*W_int[2, ...]**2,
+                      ]),
+            0, 1)
 
-def Spsi_int(W_int, g, **kwargs):
-    l1 = -(g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
-        (W_int[-1, 0, :] - W_int[-1, 1, :])
-    l2 = -(g/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
-        (W_int[-1, 0, :] - W_int[-1, 1, :])
-    return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
+    def S(self, W, W_int):
+        l1 = -self.g*W[0, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
+        l2 = -self.g*W[2, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
+        return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
+    def B(self, W, W_int):
+        l1 = -self.g*W[0, 1:-1]*(W_int[2, 1, 1:] - W_int[2, 0, :-1])
+        l2 = -self.g*self.r*W[2, 1:-1]*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
+        return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
-def Ainv_int(W_int, g, r):
-    zero = np.zeros_like(W_int[0, 0, :])
-    one = np.ones_like(W_int[0, 0, :])
-    #
-    l1 = np.array([zero, 2/(g*(1-r)*(W_int[0, 0, :] + W_int[0, 1, :])),
-                  zero, 2/(g*(r-1)*(W_int[2, 0, :] + W_int[2, 1, :]))])
-    l2 = np.array([one, zero, zero, zero])
-    l3 = -l1
-    l4 = np.array([zero, zero, one, zero])
-    return np.array([l1, l2, l3, l4])
+    def Spsi_int(self, W, W_int):
+        l1 = -(self.g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
+            (W_int[-1, 0, :] - W_int[-1, 1, :])
+        l2 = -(self.g/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
+            (W_int[-1, 0, :] - W_int[-1, 1, :])
+        return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
+    def Bpsi_int(self, W, W_int):
+        l1 = -(self.g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
+            (W_int[2, 0, :] - W_int[2, 1, :])
+        l2 = -(self.g*self.r/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
+            (W_int[0, 0, :] - W_int[0, 1, :])
+        return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
-def LocalSpeeds(W_int, g, dx):
-    h2_int = W_int[2, ...] - W_int[4, ...]
-    um = (W_int[1, ...] + W_int[3, ...])/(W_int[0, ...] + h2_int)
-    #
-    ap_int = np.row_stack(
-        (um + np.sqrt(g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).max(axis=0)
-    am_int = np.row_stack(
-        (um - np.sqrt(g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
-    return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
+    def Ainv_int(self, W, W_int):
+        zero = np.zeros_like(W_int[0, 0, :])
+        one = np.ones_like(W_int[0, 0, :])
+        #
+        l1 = np.array([zero, 2/(self.g*(1-self.r)*(W_int[0, 0, :] + W_int[0, 1, :])),
+                       zero, 2/(self.g*(self.r-1)*(W_int[2, 0, :] + W_int[2, 1, :]))])
+        l2 = np.array([one, zero, zero, zero])
+        l3 = -l1
+        l4 = np.array([zero, zero, one, zero])
+        return np.array([l1, l2, l3, l4])
 
+    def LocalSpeeds(self, W_int, dx):
+        h2_int = W_int[2, ...] - W_int[4, ...]
+        um = (W_int[1, ...] + W_int[3, ...])/(W_int[0, ...] + h2_int)
+        #
+        ap_int = np.row_stack(
+            (um + np.sqrt(self.g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).max(axis=0)
+        am_int = np.row_stack(
+            (um - np.sqrt(self.g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
+        return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
 
-# #### model class object
-phypars_default = {'g': 9.81, 'r': 0.95}
-
-Model = model('2L_layerwise', phypars_default,
-              F, Ainv_int, S, B, Spsi_int, Bpsi_int, LocalSpeeds)
-
-
-# #### Spatial discretization step
+# # #### Spatial discretization step
 
 
 # def temporalStep(W, g, r, dx, theta):

@@ -27,8 +27,6 @@ from shallowpy.core import default_pars
 from shallowpy.spatial_scheme import spatial_discretization
 from shallowpy.temporal_schemes import Runge_kutta_step
 
-# #### model specific functions
-
 
 class SW_1L_local(spatial_discretization):
 
@@ -36,11 +34,11 @@ class SW_1L_local(spatial_discretization):
         self.g = g if g is not None else default_pars['g']
         self.r = r if r is not None else default_pars['r']
         self.theta = theta if theta is not None else default_pars['theta']
-        self.epsilon = epsilon if r is not None else default_pars['epsilon']
-        self.dt_fact = dt_fact if r is not None else default_pars['dt_fact']
+        self.epsilon = epsilon if epsilon is not None else default_pars['epsilon']
+        self.dt_fact = dt_fact if dt_fact is not None else default_pars['dt_fact']
         #
         self.gprime = self.g*(1 - self.r)
-        self.vars = ['h', 'q', 'Z']
+        self.vars = ['h', 'u', 'Z']
 
     # #### temporal discretization functions
 
@@ -52,7 +50,7 @@ class SW_1L_local(spatial_discretization):
     def F(self, W_int):
         return np.swapaxes(
             np.array([W_int[0, ...]*W_int[1, ...],
-                      W_int[1, ...]**2/2 + self.g *
+                      W_int[1, ...]**2/2 + self.gprime *
                           (W_int[0, ...] + W_int[-1, ...]),
                       ]),
             0, 1)
@@ -73,7 +71,7 @@ class SW_1L_local(spatial_discretization):
         zero = np.zeros_like(W_int[0, 0, :])
         one = np.ones_like(W_int[0, 0, :])
         #
-        l1 = np.array([zero, one/self.g])
+        l1 = np.array([zero, one/self.gprime])
         l2 = np.array([2/(W_int[0, 0, :] + W_int[0, 1, :]), zero])
         return np.array([l1, l2])
 

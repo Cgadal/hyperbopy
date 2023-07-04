@@ -17,7 +17,7 @@ def run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=200, dt_save=None, x=No
     t_save = [0]
     #
     if plot_fig:
-        fig, axarr, lines = init_plot(W0, x)
+        fig, axarr, lines = init_plot(W0, x, model.vars)
     #
     # Running simulation
     while t <= tmax:
@@ -59,13 +59,13 @@ def update_plot(axarr, W, x, lines):
     return lines
 
 
-def init_plot(W0, x):
+def init_plot(W0, x, var_labels):
     fig, axarr = plt.subplots(
         W0.shape[0], 1, constrained_layout=True, sharex=True)
     #
     axarr.flatten()[-1].set_xlabel('Horizontal coordinate [m]')
-    for i, ax in enumerate(axarr.flatten()):
-        ax.set_ylabel('W[{:0d}]'.format(i))
+    for i, (ax, var_label) in enumerate(zip(axarr.flatten(), var_labels)):
+        ax.set_ylabel(var_label)
     #
     lines = plot_allvar(axarr, W0, x)
     return fig, axarr, lines
