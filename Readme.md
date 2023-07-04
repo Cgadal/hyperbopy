@@ -1,10 +1,65 @@
 # shallowpy
 
-In this project, we solve various types of shallow water equation systems using:
-- a well-balanced path-conservative central-upwind scheme for the spatial discretization (unless specified otherwise) [[1]](#1)
-- a stage-3 order-3 explicit strong stability preserving Runge-Kutta [eSSPRK 3-3] in time [[2]](#2)
+The `shallowpy` module allows solving 1D non-conservative hyperbolic systems of equations of the form:
 
-## Models
+```math
+
+\boldsymbol{U}_{t} + \boldsymbol{F}(\boldsymbol{U}, Z)_{x}  = B(\boldsymbol{U},Z)\boldsymbol{U}_{x} + \boldsymbol{S}(\boldsymbol{U})Z_{x},
+
+```
+
+where:
+ - $\boldsymbol{U} \in \mathbb{R}^{N}$ is a vector of unkown quantities
+ - $\boldsymbol{F}: \in \mathbb{R}^{N} \to \mathbb{R}^{N}$ is a non-linear flux
+ - $B(\boldsymbol{U},Z) \in \mathbb{R}^{N \times N}$ is a non-conservative term
+ - $\boldsymbol{S}(\boldsymbol{U}) \in \mathbb{R}^{N \times N}$ is a source term.
+
+The numerical schemes are:
+- spatial: well-balanced path-conservative central-upwind scheme for the spatial discretization (unless specified otherwise) [[1]](#1)
+- temporal: stage-3 order-3 explicit strong stability preserving Runge-Kutta [eSSPRK 3-3] in time [[2]](#2)
+
+## Usage
+
+Here, we show how to solve the one-layer shallow water equations already implemented in `shallowpy`. More examples are available in the `reference_cases` directory.
+
+```python
+import numpy as np
+
+from shallowpy import run_model
+from shallowpy.models import SW_1L_global
+
+# ## Domain size
+L = 10   # domain length [m]
+
+# ## Grid parameters
+tmax = 2.5  # s  max time
+Nx = 1000  # spatial grid points number (evenly spaced)
+x = np.linspace(0, L, Nx)
+dx = L/(Nx - 1)
+
+# ## Initial condition
+# Bottom topography
+Z = 0*x
+# fluid height
+hmin = 1e-10
+l0 = 5
+h0 = 0.5
+h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0) 
+# fluid velocity
+q = np.zeros_like(x)
+
+W0 = np.array([h, q, Z])
+
+# ## model instance initialization
+model = SW_1L_global()  # with default parameters
+
+# ## Run model
+U, t = run_model(model, W0, tmax, dx, 
+                 plot_fig=True, dN_fig=50, x=x, Z=Z)
+
+```
+
+## Implemented models
 
 - $h$: layer height
 - $u$: layer velocity
@@ -110,9 +165,9 @@ N &= \left[ [h^{2}]_{t}\left( h [u]_{x} - [Z]_{x} u \right)   \right]_{x} + 2[Z]
 
 ```
 
-## Usage
+## Custom models
 
-See reference examples.
+Using custom models is not yet possible, due to the way boundary conditions are implemented. This will be fixed soon.
 
 ## Installation
 
@@ -131,10 +186,13 @@ See reference examples.
 
 ## Changelog
 
+- **04/07/02023**: version: 0.1.0
+  - Reworking all code, separating model definition, spatial scheme and temporal scheme. 
+
 - **20/06/02023**:
   - adding non-hydro globally conservative on-layer model
 
-- **13/06/2023**:
+- **13/06/2023**: version: 0.0.1
   - changing repo organization to be able to select within system of equations
   - adding the locally conservative two-layer model [dam break shows shock solution]
   - adding the globally conservative one-layer model [dam break shows Ritter solution]
