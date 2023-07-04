@@ -26,7 +26,7 @@ REFERENCE: Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservat
 
 import numpy as np
 
-from .general import H, RHSS_func, Variables_int
+from ..general import model
 
 # #### model specific functions
 
@@ -43,7 +43,7 @@ def F(W_int, g, r):
         0, 1)
 
 
-def Ainv_int_func(W_int, g, r):
+def Ainv_int(W_int, g, r):
     zero = np.zeros_like(W_int[0, 0, :])
     one = np.ones_like(W_int[0, 0, :])
     #
@@ -65,23 +65,47 @@ def LocalSpeeds(W_int, g, dx):
         (um - np.sqrt(g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
     return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
 
-# #### Spatial discretization step
+
+def S(W):
+    return np.zeros_like(W[:-1, 1:-1])
 
 
-def temporalStep(W, g, r, dx, theta):
-    # Compute intercell variables
-    W_int = Variables_int(W, dx, theta)
-    # Compute Local speeds
-    a_int, dtmax = LocalSpeeds(W_int, g, dx)
-    # Compute intermediate matrices
-    Ainv_int = Ainv_int_func(W_int, g, r)
-    B, S = np.zeros_like(W[:-1, 1:-1]), np.zeros_like(W[:-1, 1:-1])
-    Bpsi_int, Spsi_int = np.zeros_like(
-        W_int[:-1, 0, :]), np.zeros_like(W_int[:-1, 0, :])
-    # Compute Fluxes
-    Fluxes = F(W_int, g, r)
-    H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
-    # Compute sources
-    # no sources
-    # Computing right hand side
-    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1]), dtmax
+def B(W):
+    return np.zeros_like(W[:-1, 1:-1])
+
+
+def Bpsi_int(W_int):
+    return np.zeros_like(W_int[:-1, 0, :])
+
+
+def Spsi_int(W_int):
+    return np.zeros_like(W_int[:-1, 0, :])
+
+
+# #### model class object
+phypars_default = {'g': 9.81, 'r': 0.95}
+
+Model = model('2L_local', phypars_default,
+              F, Ainv_int, S, B, Spsi_int, Bpsi_int, LocalSpeeds)
+
+
+# # #### Spatial discretization step
+
+
+# def temporalStep(W, g, r, dx, theta):
+#     # Compute intercell variables
+#     W_int = Variables_int(W, dx, theta)
+#     # Compute Local speeds
+#     a_int, dtmax = LocalSpeeds(W_int, g, dx)
+#     # Compute intermediate matrices
+#     Ainv_int = Ainv_int_func(W_int, g, r)
+#     B, S = np.zeros_like(W[:-1, 1:-1]), np.zeros_like(W[:-1, 1:-1])
+#     Bpsi_int, Spsi_int = np.zeros_like(
+#         W_int[:-1, 0, :]), np.zeros_like(W_int[:-1, 0, :])
+#     # Compute Fluxes
+#     Fluxes = F(W_int, g, r)
+#     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
+#     # Compute sources
+#     # no sources
+#     # Computing right hand side
+#     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1]), dtmax

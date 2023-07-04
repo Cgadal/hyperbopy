@@ -1,43 +1,40 @@
 import numpy as np
 
 from shallowpy import run_model
+from shallowpy.models import SW_1L_global
 
 model = '1L_global'
 
 # ## Domain size
-L = 3   # domain length [m]
-Hmax = 5   # water height [m]
+L = 10   # domain length [m]
 
 # ## Grid parameters
-tmax = 1  # s  max time
-Nx = 500  # spatial grid points number (evenly spaced)
+tmax = 2.5  # s  max time
+Nx = 1000  # spatial grid points number (evenly spaced)
 x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
 
-# ## Numerical parameters
-theta = 1.5
-
-# ## wave properties
-# gaussian
-x0 = L/2
-h0 = 1
-sigma_0 = 0.2
-
-# window
-l0 = 3*sigma_0
 
 # ## Initial condition
 # Bottom topography
 Z = 0*x
 
-# layer
-# h = Hmax*np.ones_like(x) + h0*np.exp(-((x - x0)/sigma_0)**2)  # gaussian
-h = Hmax*np.ones_like(x) + np.where((x >= x0 - l0/2)
-                                          & (x <= x0 + l0/2), h0, 0)  # window
+# height
+# ## wave properties
+l0 = 3
+x0 = L/2
+h0 = 3
+Hlayer = 5
+
+h = Hlayer*np.ones_like(x) + np.where((x >= x0 - l0/2)
+                                      & (x <= x0 + l0/2), h0, 0)  # window
+# velocity
 q = np.zeros_like(x)
 
 W0 = np.array([h, q, Z])
 
+# ## model instance initialization
+model = SW_1L_global()  # with default parameters
+
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
-                 dN_fig=100, x=x, Z=Z, theta=theta, dt_fact=0.5)
+U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)

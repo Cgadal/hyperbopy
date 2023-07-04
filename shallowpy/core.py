@@ -1,52 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from shallowpy.models.twolayer_layerwise import temporalStep as temporalStep_2L_layerwise
-from shallowpy.models.twolayer_local import temporalStep as temporalStep_2L_local
-from shallowpy.models.onelayer_global import temporalStep as temporalStep_1L_global
-from shallowpy.models.onelayer_local import temporalStep as temporalStep_1L_local
-from shallowpy.models.onelayer_nonhydro_global import temporalStep as temporalStep_1L_nonhydro_global
-#
-from shallowpy.models.onelayer_nonhydro_global import update_step as update_step_1L_nonhydro
+# ### main run function
 
 
-def update_step_regular(temporalStep, W, g, r, dx, theta, dt_fact=0.5, dt=None):
-    RHS, dtmax = temporalStep(W, g, r, dx, theta)
-    if dt is None:
-        dt = dtmax*dt_fact
-    #
-    W_next = np.copy(W)
-    W_next[:-1, 1:-1] = W[:-1, 1:-1] + dt*RHS
-    # boundary conditions (0 for q, reflective fo h)
-    W_up = np.hstack([np.array([W_next[2*i, 1], 0])
-                     for i in range((W_next.shape[0] - 1)//2)])
-    W_down = np.hstack([np.array([W_next[2*i, -2], 0])
-                       for i in range((W_next.shape[0] - 1)//2)])
-    W_next[:-1, 0], W_next[:-1, -1] = W_up, W_down
-    return W_next, dt
-
-
-dic_models = {'2L_layerwise': [update_step_regular, temporalStep_2L_layerwise],
-              '2L_local': [update_step_regular, temporalStep_2L_local],
-              '1L_global': [update_step_regular, temporalStep_1L_global],
-              '1L_local': [update_step_regular, temporalStep_1L_local],
-              '1L_non_hydro_global': [update_step_1L_nonhydro, temporalStep_1L_nonhydro_global],
-              }
-
-
-def finder(model):
-    if model in dic_models.keys():
-        return dic_models[model]
-    else:
-        raise ValueError(
-            "'{}' not recognised, check implemented models".format(model)) from None
-
-
-def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fig=200,
-              dt_save=None, x=None, Z=None, dt_fact=0.5, **kwargs):
+def run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=200, dt_save=None, x=None, Z=None):
     if dt_save is None:
         dt_save = tmax/100
-    update_step, temporalStep = finder(model)
     #
     # Initialization
     W = np.copy(W0)
@@ -59,25 +19,17 @@ def run_model(model, W0, tmax, dx, g=9.81, r=0.95, theta=1, plot_fig=True, dN_fi
     if plot_fig:
         fig, axarr, lines = init_plot(W0, x)
     #
+    # Running simulation
     while t <= tmax:
-        # # Computing RightHandSide
-        # # # Euler in time
-        # W = update_step(W, g, r, dx, theta, dt_fact)
-        #
-        # # (3, 3) eSSPRK(3,3)
-        w1, dt = update_step(temporalStep, W, g, r, dx,
-                             theta, dt_fact, **kwargs)
-        w2 = (3/4)*W + (1/4)*update_step(temporalStep,
-                                         w1, g, r, dx, theta, dt=dt, **kwargs)[0]
-        W = (1/3)*W + (2/3)*update_step(temporalStep,
-                                        w2, g, r, dx, theta, dt=dt, **kwargs)[0]
-        #
+        # update time step
+        W, dt = model.temporalstep(W, dx)
         t += dt
         Nt += 1
-        #
+        # update saved time steps
         if (t - t_save[-1]) >= dt_save:
             t_save.append(t)
             U_save.append(W[:-1, :])
+        # update interactive figure
         if plot_fig & (Nt % dN_fig == 0):
             plt.suptitle('{:.1e} s, {:0d}'.format(t, Nt))
             lines = update_plot(axarr, W, x, lines)
@@ -117,3 +69,15 @@ def init_plot(W0, x):
     #
     lines = plot_allvar(axarr, W0, x)
     return fig, axarr, lines
+
+
+# #### default parameters
+
+default_pars = {
+    'g': 9.81,
+    'r': 0.95,
+    'theta': 1,
+    'hmin': 1e-10,
+    'epsilon': 1.e-15,
+    'dt_fact': 0.5,
+}

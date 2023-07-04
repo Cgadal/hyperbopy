@@ -28,7 +28,7 @@ REFERENCE: Chertock, A., Kurganov, A., & Liu, Y. (2020). Finite-volume-particle 
 import numpy as np
 from scipy.linalg import solve_banded
 
-from shallowpy.models.general import H, Variables_int
+from shallowpy.general import H, Variables_int
 
 
 def F(W_int, g):

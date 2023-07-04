@@ -26,7 +26,7 @@ REFERENCE: Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservat
 
 import numpy as np
 
-from .general import H, RHSS_func, Variables_int
+from ..general import model
 
 # #### model specific functions
 
@@ -41,19 +41,19 @@ def F(W_int, g, r):
         0, 1)
 
 
-def B_func(W, W_int, g, r):
+def B(W, W_int, g, r):
     l1 = -g*W[0, 1:-1]*(W_int[2, 1, 1:] - W_int[2, 0, :-1])
     l2 = -g*r*W[2, 1:-1]*(W_int[0, 1, 1:] - W_int[0, 0, :-1])
     return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
 
-def S_func(W, W_int, g):
+def S(W, W_int, g):
     l1 = -g*W[0, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
     l2 = -g*W[2, 1:-1]*(W_int[-1, 1, 1:] - W_int[-1, 0, :-1])
     return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
 
-def Bpsi_int_func(W_int, g, r):
+def Bpsi_int(W_int, g, r):
     l1 = -(g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
         (W_int[2, 0, :] - W_int[2, 1, :])
     l2 = -(g*r/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
@@ -61,7 +61,7 @@ def Bpsi_int_func(W_int, g, r):
     return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
 
-def Spsi_int_func(W_int, g, r):
+def Spsi_int(W_int, g, **kwargs):
     l1 = -(g/2)*(W_int[0, 0, :] + W_int[0, 1, :]) * \
         (W_int[-1, 0, :] - W_int[-1, 1, :])
     l2 = -(g/2)*(W_int[2, 0, :] + W_int[2, 1, :]) * \
@@ -69,7 +69,7 @@ def Spsi_int_func(W_int, g, r):
     return np.array([np.zeros_like(l1), l1, np.zeros_like(l1), l2])
 
 
-def Ainv_int_func(W_int, g, r):
+def Ainv_int(W_int, g, r):
     zero = np.zeros_like(W_int[0, 0, :])
     one = np.ones_like(W_int[0, 0, :])
     #
@@ -91,22 +91,30 @@ def LocalSpeeds(W_int, g, dx):
         (um - np.sqrt(g*(W_int[0, ...] + h2_int)), np.zeros_like(um[0, :]))).min(axis=0)
     return np.array([ap_int, am_int]), dx/(2*np.amax([ap_int, -am_int]))
 
+
+# #### model class object
+phypars_default = {'g': 9.81, 'r': 0.95}
+
+Model = model('2L_layerwise', phypars_default,
+              F, Ainv_int, S, B, Spsi_int, Bpsi_int, LocalSpeeds)
+
+
 # #### Spatial discretization step
 
 
-def temporalStep(W, g, r, dx, theta):
-    # Compute intercell variables
-    W_int = Variables_int(W, dx, theta)
-    # Compute Local speeds
-    a_int, dtmax = LocalSpeeds(W_int, g, dx)
-    # Compute intermediate matrices
-    Ainv_int = Ainv_int_func(W_int, g, r)
-    Bpsi_int, Spsi_int = Bpsi_int_func(W_int, g, r), Spsi_int_func(W_int, g, r)
-    B, S = B_func(W, W_int, g, r), S_func(W, W_int, g)
-    # Compute Fluxes
-    Fluxes = F(W_int, g, r)
-    H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
-    # Compute sources
-    RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
-    # Computing right hand side
-    return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
+# def temporalStep(W, g, r, dx, theta):
+#     # Compute intercell variables
+#     W_int = Variables_int(W, dx, theta)
+#     # Compute Local speeds
+#     a_int, dtmax = LocalSpeeds(W_int, g, dx)
+#     # Compute intermediate matrices
+#     Ainv_int = Ainv_int_func(W_int, g, r)
+#     Bpsi_int, Spsi_int = Bpsi_int_func(W_int, g, r), Spsi_int_func(W_int, g, r)
+#     B, S = B_func(W, W_int, g, r), S_func(W, W_int, g)
+#     # Compute Fluxes
+#     Fluxes = F(W_int, g, r)
+#     H_int = H(Fluxes, a_int, W_int, Ainv_int, Spsi_int)
+#     # Compute sources
+#     RHSS = RHSS_func(B, S, Bpsi_int, Spsi_int, a_int)
+#     # Computing right hand side
+#     return (-1/dx)*(H_int[:, 1:] - H_int[:, :-1] + RHSS), dtmax
