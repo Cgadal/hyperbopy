@@ -184,6 +184,18 @@ Using custom models is not yet possible, due to the way boundary conditions are 
 
 - <a id="3">[3]</a> Chertock, A., & Kurganov, A. (2020). Central-upwind scheme for a non-hydrostatic Saint-Venant system. Hyperbolic Problems: Theory, Numerics, Applications, 10.
 
+## To-do list
+
+1. implementing a choice for boundary conditions type per variables
+
+2. adding a `path_conservative=True/False` option for faster solving easier systems
+
+3. When 2. is done, adding a new possible source term that does not-depend on derivatives (and thus does not need the path-conservative scheme)
+ 
+4. Adding the draining-time technique for wet/dry fronts
+
+5. Adding the positivity preserving technique (if possible)
+
 ## Changelog
 
 - **04/07/02023**: version: 0.1.0
