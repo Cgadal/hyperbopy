@@ -17,7 +17,7 @@ class spatial_discretization(abc.ABC):
         # Compute intermediate matrices
         Ainv_int = self.Ainv_int(W, W_int)
         Bpsi_int = self.Bpsi_int(W, W_int)
-        Spsi_int = self.Bpsi_int(W, W_int)
+        Spsi_int = self.Spsi_int(W, W_int)
         B = self.B(W, W_int)
         S = self.S(W, W_int)
         # Compute Fluxes

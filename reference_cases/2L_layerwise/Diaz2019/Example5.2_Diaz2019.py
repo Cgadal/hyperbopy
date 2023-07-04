@@ -2,10 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from shallowpy import run_model
+from shallowpy.models import SW_2L_layerwise
 
-model = '2L_layerwise'
-
-# Spatial grid
+# ## Grid parameters
+tmax = 7
 Nx = 400
 x = np.linspace(-5, 5, Nx)
 dx = np.diff(x)[0]
@@ -25,13 +25,11 @@ Z = -2*np.ones_like(x)
 
 W0 = np.array([h1, q1, h2, q2, Z])
 
-# other numerical parameters
-theta = 1
-tmax = 7
+# ## model instance initialization
+model = SW_2L_layerwise()  # with default parameters
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
-                 dN_fig=100, x=x, Z=Z, theta=theta, dt_fact=0.5)
+U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 # %% plot final figure
 fig, ax = plt.subplots(1, 1, layout='constrained')

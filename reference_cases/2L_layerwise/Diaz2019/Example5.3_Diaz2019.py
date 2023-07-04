@@ -2,13 +2,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from shallowpy import run_model
+from shallowpy.models import SW_2L_layerwise
 
-model = '2L_layerwise'
-
-# Spatial grid
+# ## Grid parameters
 Nx = 1000
 x = np.linspace(-1, 1, Nx)
 dx = np.diff(x)[0]
+tmax = 1
 
 # initial conditions
 U_R = np.array([0.37002, -0.18684, 1.59310, 0.17416])
@@ -21,13 +21,11 @@ W0[-1, :] = - (U_L[0] + U_L[2])
 
 Z = W0[-1, :]
 
-# other numerical parameters
-theta = 1
-tmax = 1
+# ## model instance initialization
+model = SW_2L_layerwise()  # with default parameters
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
-                 dN_fig=10, x=x, Z=Z, theta=theta, dt_fact=0.5)
+U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 # %% plot final figure
 fig, ax = plt.subplots(1, 1, layout='constrained')
