@@ -1,8 +1,7 @@
 import numpy as np
 
-from shallowpy import run_model
-
-model = '1L_non_hydro_global'
+from shallowpy import Simulation
+from shallowpy.models import SW1LNonhydroGlobal
 
 # ## Domain size
 L = 3   # domain length [m]
@@ -38,6 +37,10 @@ q = np.zeros_like(x)
 
 W0 = np.array([h, q, Z])
 
+# ## Initialization
+model = SW1LNonhydroGlobal(a_N=0.2, a_M=0.2)  # model with default parameters
+simu = Simulation(model, W0, dx, temporal_scheme='RungeKutta33',
+                  spatial_scheme='CentralUpwindPathNoneHydro')  # simulation
+
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, g=9.81, r=0.95, plot_fig=True,
-                 dN_fig=20, x=x, Z=Z, theta=theta, dt_fact=0.5, a_N=0.2, a_M=0.2, pa=0)
+U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=100, x=x, Z=Z)

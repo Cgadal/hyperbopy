@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from shallowpy import run_model
-from shallowpy.models import SW_1L_local
+from shallowpy import Simulation
+from shallowpy.models import SW1LLocal
 
 # ## Domain size
 L = 10   # domain length [m]
@@ -25,15 +25,16 @@ h0 = 0.5
 h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0)  # window
 
 # velocity
-q = np.zeros_like(x)
+u = np.zeros_like(x)
 
-W0 = np.array([h, q, Z])
+W0 = np.array([h, u, Z])
 
-# ## model instance initialization
-model = SW_1L_local()  # with default parameters
+# ## Initialization
+model = SW1LLocal()  # model with default parameters
+simu = Simulation(model, W0, dx)  # simulation
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
+U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 # %% Compare with theory
 

@@ -1,8 +1,8 @@
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
-from shallowpy import run_model
-from shallowpy.models import SW_2L_layerwise
+from shallowpy import Simulation
+from shallowpy.models import SW2LLayerwise
 
 # ## Grid parameters
 tmax = 7
@@ -25,11 +25,13 @@ Z = -2*np.ones_like(x)
 
 W0 = np.array([h1, q1, h2, q2, Z])
 
-# ## model instance initialization
-model = SW_2L_layerwise()  # with default parameters
+# ## Initialization
+model = SW2LLayerwise()  # model with default parameters
+simu = Simulation(
+    model, W0, dx, spatial_scheme='CentralUpwindPathConservative')  # simulation
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
+U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 # %% plot final figure
 fig, ax = plt.subplots(1, 1, layout='constrained')

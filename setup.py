@@ -7,6 +7,6 @@ setup(name="shallowpy",
           "numpy", "matplotlib"],
       author='Cyril Gadal',
       license='Apache-2.0',
-      version='0.1.0',
+      version='0.1.1',
       zip_safe=False,
       )

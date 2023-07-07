@@ -1,8 +1,8 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-from shallowpy import run_model
-from shallowpy.models import SW_1L_global
+from shallowpy import Simulation
+from shallowpy.models import SW1LGlobal
 
 # ## Domain size
 L = 10   # domain length [m]
@@ -29,11 +29,12 @@ q = np.zeros_like(x)
 
 W0 = np.array([h, q, Z])
 
-# ## model instance initialization
-model = SW_1L_global()  # with default parameters
+# ## Initialization
+model = SW1LGlobal()  # model with default parameters
+simu = Simulation(model, W0, dx)  # simulation
 
 # %% Run model
-U, t = run_model(model, W0, tmax, dx, plot_fig=True, dN_fig=50, x=x, Z=Z)
+U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 # %% Compare with theory
 

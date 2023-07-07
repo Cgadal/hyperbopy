@@ -26,30 +26,25 @@ REFERENCE: Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservat
 
 import numpy as np
 
-from shallowpy.core import default_pars
-from shallowpy.spatial_scheme import spatial_discretization
-from shallowpy.temporal_schemes import Runge_kutta_step
+from .basemodel import BaseModel
 
 
-class SW_2L_local(spatial_discretization):
+class SW2LLocal(BaseModel):
+
+    name = 'SW2LLocal'
 
     def __init__(self, g=None, r=None, theta=None, epsilon=None, dt_fact=None):
-        self.g = g if g is not None else default_pars['g']
-        self.r = r if r is not None else default_pars['r']
-        self.theta = theta if theta is not None else default_pars['theta']
-        self.epsilon = epsilon if epsilon is not None else default_pars['epsilon']
-        self.dt_fact = dt_fact if dt_fact is not None else default_pars['dt_fact']
+        self.g = g if g is not None else self.GRAVITATIONAL_CONSTANT
+        self.r = r if r is not None else self.DENSITY_RATIO
+        self.theta = theta if theta is not None else self.THETA
+        self.epsilon = epsilon if epsilon is not None else self.EPSILON
+        self.dt_fact = dt_fact if dt_fact is not None else self.DT_FACT
         #
-        self.vars = ['h1', 'u1', 'h2', 'u2', 'Z']
-
-    # #### temporal discretization functions
-
-    def temporalstep(self, W, dx):
-        return Runge_kutta_step(self, W, dx)
+        self.var_names = ['h1', 'u1', 'h2', 'u2', 'Z']
 
     # #### spatial discretization functions
 
-    def F(self, W_int):
+    def compute_F(self, W_int):
         return np.swapaxes(
             np.array([W_int[0, ...]*W_int[1, ...],
                       W_int[1, ...]**2/2 + self.g *
@@ -60,19 +55,19 @@ class SW_2L_local(spatial_discretization):
                       ]),
             0, 1)
 
-    def S(self, W, W_int):
+    def compute_S(self, W, W_int):
         return np.zeros_like(W[:-1, 1:-1])
 
-    def B(self, W, W_int):
+    def compute_B(self, W, W_int):
         return np.zeros_like(W[:-1, 1:-1])
 
-    def Bpsi_int(self, W, W_int):
+    def compute_Bpsi_int(self, W, W_int):
         return np.zeros_like(W_int[:-1, 0, :])
 
-    def Spsi_int(self, W, W_int):
+    def compute_Spsi_int(self, W, W_int):
         return np.zeros_like(W_int[:-1, 0, :])
 
-    def Ainv_int(self, W, W_int):
+    def compute_Ainv_int(self, W, W_int):
         zero = np.zeros_like(W_int[0, 0, :])
         one = np.ones_like(W_int[0, 0, :])
         #
@@ -83,7 +78,7 @@ class SW_2L_local(spatial_discretization):
         l4 = np.array([zero, zero, 2/(W_int[2, 0, :] + W_int[2, 1, :]), zero])
         return np.array([l1, l2, l3, l4])
 
-    def LocalSpeeds(self, W_int, dx):
+    def compute_local_speeds(self, W_int, dx):
         h2_int = W_int[2, ...] - W_int[4, ...]
         um = (W_int[1, ...] + W_int[3, ...])/(W_int[0, ...] + h2_int)
         #

@@ -15,8 +15,8 @@ where:
  - $\boldsymbol{S}(\boldsymbol{U}) \in \mathbb{R}^{N \times N}$ is a source term.
 
 The numerical schemes are:
-- spatial: well-balanced path-conservative central-upwind scheme for the spatial discretization (unless specified otherwise) [[1]](#1)
-- temporal: stage-3 order-3 explicit strong stability preserving Runge-Kutta [eSSPRK 3-3] in time [[2]](#2)
+- spatial: well-balanced central-upwind scheme (path-conservative or not) for the spatial discretization (unless specified otherwise) [[1](#1),[2](#2)]
+- temporal: stage-3 order-3 explicit strong stability preserving Runge-Kutta [eSSPRK 3-3] in time [[3]](#3)
 
 ## Usage
 
@@ -25,8 +25,8 @@ Here, we show how to solve the one-layer shallow water equations already impleme
 ```python
 import numpy as np
 
-from shallowpy import run_model
-from shallowpy.models import SW_1L_global
+from shallowpy import Simulation
+from shallowpy.models import SW1LGlobal
 
 # ## Domain size
 L = 10   # domain length [m]
@@ -40,22 +40,25 @@ dx = L/(Nx - 1)
 # ## Initial condition
 # Bottom topography
 Z = 0*x
-# fluid height
+
+# layer
 hmin = 1e-10
 l0 = 5
 h0 = 0.5
-h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0) 
-# fluid velocity
+#
+h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0)  # window
+
+# velocity
 q = np.zeros_like(x)
 
 W0 = np.array([h, q, Z])
 
-# ## model instance initialization
-model = SW_1L_global()  # with default parameters
+# ## Initialization
+model = SW1LGlobal()  # model with default parameters
+simu = Simulation(model, W0, dx)  # simulation
 
-# ## Run model
-U, t = run_model(model, W0, tmax, dx, 
-                 plot_fig=True, dN_fig=50, x=x, Z=Z)
+# %% Run model
+U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)
 
 ```
 
@@ -129,7 +132,7 @@ N &= \left[ [h^{2}]_{t}\left( h [u]_{x} - [Z]_{x} u \right)   \right]_{x} + 2[Z]
 
 
   > **Note**
-  > The spatial discretization scheme is here a well-balanced central upwind scheme. For additional details, please refer to [[3]](#3).
+  > The spatial discretization scheme is here a well-balanced central upwind scheme. For additional details, please refer to [[4]](#4).
 
 ### Two-layer models
 
@@ -178,25 +181,30 @@ Using custom models is not yet possible, due to the way boundary conditions are 
 
 ## References
 
-- <a id="1">[1]</a> Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservative central-upwind schemes for nonconservative hyperbolic systems. ESAIM: Mathematical Modelling and Numerical Analysis, 53[3], 959-985.
+- <a id="1">[1]</a> Kurganov, A., & Petrova, G. (2007). A second-order well-balanced positivity preserving central-upwind scheme for the Saint-Venant system. Communications in Mathematical Sciences, 5(1), 133-160.
+  
+- <a id="2">[2]</a> Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservative central-upwind schemes for nonconservative hyperbolic systems. ESAIM: Mathematical Modelling and Numerical Analysis, 53[3], 959-985.
 
-- <a id="2">[2]</a> Isherwood, L., Grant, Z. J., & Gottlieb, S. (2018). Strong stability preserving integrating factor Runge--Kutta methods. SIAM Journal on Numerical Analysis, 56[6], 3276-3307.
+- <a id="3">[3]</a> Isherwood, L., Grant, Z. J., & Gottlieb, S. (2018). Strong stability preserving integrating factor Runge--Kutta methods. SIAM Journal on Numerical Analysis, 56[6], 3276-3307.
 
-- <a id="3">[3]</a> Chertock, A., & Kurganov, A. (2020). Central-upwind scheme for a non-hydrostatic Saint-Venant system. Hyperbolic Problems: Theory, Numerics, Applications, 10.
+- <a id="4">[4]</a> Chertock, A., & Kurganov, A. (2020). Central-upwind scheme for a non-hydrostatic Saint-Venant system. Hyperbolic Problems: Theory, Numerics, Applications, 10.
 
 ## To-do list
 
 1. implementing a choice for boundary conditions type per variables
 
-2. adding a `path_conservative=True/False` option for faster solving easier systems
+2. ~~adding a `path_conservative=True/False` option for faster solving easier systems~~
 
-3. When 2. is done, adding a new possible source term that does not-depend on derivatives (and thus does not need the path-conservative scheme)
+3. ~~When 2. is done, adding a new possible source term that does not-depend on derivatives (and thus does not need the path-conservative scheme)~~
  
 4. Adding the draining-time technique for wet/dry fronts
 
 5. Adding the positivity preserving technique (if possible)
 
 ## Changelog
+
+- **07/07/02023**: version: 0.1.1
+  - Reworking code, creating new classes for spatial schemes, temporal schemes, plotting, and starting simulation
 
 - **04/07/02023**: version: 0.1.0
   - Reworking all code, separating model definition, spatial scheme and temporal scheme. 
