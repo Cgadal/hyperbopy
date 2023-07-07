@@ -31,9 +31,12 @@ q = np.zeros_like(x)
 
 W0 = np.array([h, q, Z])
 
+# ## Boundary conditions
+BCs = [['symmetry', 'symmetry'], [0, 0]]
+
 # ## Initialization
 model = SW1LGlobal()  # model with default parameters
-simu = Simulation(model, W0, dx)  # simulation
+simu = Simulation(model, W0, BCs, dx)  # simulation
 
 # %% Run model
 U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=100, x=x, Z=Z)

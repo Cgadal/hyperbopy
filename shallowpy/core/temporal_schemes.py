@@ -6,6 +6,8 @@ Temporal discretization
 import numpy as np
 from scipy.linalg import solve_banded
 
+from .boundary_conditions import BoundaryConditions
+
 available_temporal_schemes = {}
 
 
@@ -17,10 +19,13 @@ def register_temporal_scheme(CustomTemporalScheme):
 
 class EulerBase():
 
-    def __init__(self, model, spatial_scheme, dt_fact):
+    def __init__(self, model, spatial_scheme, dt_fact, BCs):
         self.model = model
         self.SpatialScheme = spatial_scheme
         self.dt_fact = dt_fact
+        self.BCs = BCs
+        #
+        self.BoundaryConditions = BoundaryConditions(self.BCs)
 
     def _euler_step_regular(self, W, dx, dt=None):
         RHS, dtmax = self.SpatialScheme.compute_RHS(W, dx)
@@ -30,11 +35,12 @@ class EulerBase():
         W_next = np.copy(W)
         W_next[:-1, 1:-1] = W[:-1, 1:-1] + dt*RHS
         # boundary conditions (0 for q or u, reflective for h)
-        W_up = np.hstack([np.array([W_next[2*i, 1], 0])
-                          for i in range((W_next.shape[0] - 1)//2)])
-        W_down = np.hstack([np.array([W_next[2*i, -2], 0])
-                            for i in range((W_next.shape[0] - 1)//2)])
-        W_next[:-1, 0], W_next[:-1, -1] = W_up, W_down
+        self.BoundaryConditions.update_all(W_next)
+        # W_up = np.hstack([np.array([W_next[2*i, 1], 0])
+        #                   for i in range((W_next.shape[0] - 1)//2)])
+        # W_down = np.hstack([np.array([W_next[2*i, -2], 0])
+        #                     for i in range((W_next.shape[0] - 1)//2)])
+        # W_next[:-1, 0], W_next[:-1, -1] = W_up, W_down
         return W_next, dt
 
     def _euler_step_nonhydro(self, W, dx, dt=None):
@@ -46,7 +52,9 @@ class EulerBase():
         # ### update only h
         W_next[0, 1:-1] = W[0, 1:-1] + dt*RHS[0, :]  # update only w = h + Z
         # apply boundary conditions on h here to keep dims
-        W_next[0, 0], W_next[0, -1] = W_next[0, 1], W_next[0, -2]
+        self.BoundaryConditions.BCS_parsed[0][0].update_bc(W_next[0])  # left
+        self.BoundaryConditions.BCS_parsed[0][1].update_bc(W_next[0])  # right
+        # W_next[0, 0], W_next[0, -1] = W_next[0, 1], W_next[0, -2]
         # #### update q
         coupled_q = LHS + dt*RHS[1, :]
         #
@@ -56,9 +64,10 @@ class EulerBase():
         Tau_next = self.model.compute_reduced_Tau(
             h_next, dh_next, hint_next, dB, dB_int, dx)
         q_next = solve_banded((1, 1), Tau_next, coupled_q)
-        # apply boundayr conditions on q
         W_next[1, 1:-1] = q_next
-        W_next[1, 0], W_next[1, -1] = 0, 0
+        # apply boundary conditions on q
+        self.BoundaryConditions.BCS_parsed[1][0].update_bc(W_next[1])  # left
+        self.BoundaryConditions.BCS_parsed[1][1].update_bc(W_next[1])  # right
         #
         return W_next, dt
 

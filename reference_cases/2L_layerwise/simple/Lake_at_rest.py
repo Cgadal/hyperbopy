@@ -27,10 +27,14 @@ q2 = np.zeros_like(x)
 
 W0 = np.array([h1, q1, h2, q2, Z])
 
+# ## Boundary conditions
+BCs = [['symmetry', 'symmetry'], [0, 0],
+       ['symmetry', 'symmetry'], [0, 0]]
+
 # ## Initialization
 model = SW2LLayerwise()  # model with default parameters
 simu = Simulation(
-    model, W0, dx)  # simulation
+    model, W0, BCs, dx)  # simulation
 
 # %% Run model
 U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)

@@ -12,36 +12,31 @@ Nx = 1000  # spatial grid points number (evenly spaced)
 x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
 
+# Injection properties
+h0 = 0.5
+q0 = 2
+
 # ## Initial condition
 # Bottom topography
 Z = 0*x
 
 # layer
 hmin = 1e-10
-l0 = 5
-h0 = 0.5
-#
-h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0)  # window
-
-# layers
-hmin = 1e-10
-l0 = 0.3
-h0 = 0.3
 Htop = 10
 
-h2 = np.empty_like(x)
-h2[x <= l0] = h0
-h2[x > l0] = hmin
+h2 = hmin*np.ones_like(x)
+h2[0] = h0
 h1 = Htop*np.ones_like(x) - h2
 
 # velocities
 q1, q2 = np.zeros_like(x), np.zeros_like(x)
+q2[0] = q0
 
 W0 = np.array([h1, q1, h2, q2, Z])
 
 # ## Boundary conditions
-BCs = [['symmetry', 'symmetry'], [0, 0],
-       ['symmetry', 'symmetry'], [0, 0]]
+BCs = [['symmetry', 'symmetry'], [0, 'symmetry'],
+       [h0, 'symmetry'], [q0, 'symmetry']]
 
 # ## Initialization
 model = SW2LLayerwise()  # model with default parameters

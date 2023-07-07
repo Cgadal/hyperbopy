@@ -10,8 +10,9 @@ from shallowpy.core.graphics import SimuFigure
 
 class Simulation:
 
-    def __init__(self, model, W0, dx, temporal_scheme=None, spatial_scheme=None, dt_fact=None):
+    def __init__(self, model, W0, BCs, dx, temporal_scheme=None, spatial_scheme=None, dt_fact=None):
         self.model = model
+        self.BCs = BCs
         self.temporal_scheme_name = temporal_scheme if temporal_scheme is not None else 'RungeKutta33'
         self.spatial_scheme_name = spatial_scheme if spatial_scheme is not None else 'CentralUpwind'
         self.W0 = W0
@@ -22,7 +23,7 @@ class Simulation:
         self.SpatialScheme = available_spatial_schemes[self.spatial_scheme_name](
             self.model)
         self.TemporalScheme = available_temporal_schemes[self.temporal_scheme_name](
-            self.model, self.SpatialScheme, self.dt_fact)
+            self.model, self.SpatialScheme, self.dt_fact, self.BCs)
 
     def run_simulation(self, tmax, plot_fig=True, dN_fig=200, dt_save=None, x=None, Z=None):
         #

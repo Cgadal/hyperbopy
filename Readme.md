@@ -53,9 +53,12 @@ q = np.zeros_like(x)
 
 W0 = np.array([h, q, Z])
 
+# ## Boundary conditions
+BCs = [['symmetry', 'symmetry'], [0, 0]]
+
 # ## Initialization
 model = SW1LGlobal()  # model with default parameters
-simu = Simulation(model, W0, dx)  # simulation
+simu = Simulation(model, W0, BCs, dx)  # simulation
 
 # %% Run model
 U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)
@@ -170,7 +173,7 @@ N &= \left[ [h^{2}]_{t}\left( h [u]_{x} - [Z]_{x} u \right)   \right]_{x} + 2[Z]
 
 ## Custom models
 
-Using custom models is not yet possible, due to the way boundary conditions are implemented. This will be fixed soon.
+To use a custom model, you need to create a class that implements as methods the matrices used by the wanted spatial scheme. The easiest would be to copy an already implemented models in `shallowpy.models`, and modify it with the appropriate fluxes, sources, etc ...
 
 ## Installation
 
@@ -191,7 +194,7 @@ Using custom models is not yet possible, due to the way boundary conditions are 
 
 ## To-do list
 
-1. implementing a choice for boundary conditions type per variables
+1. ~~implementing a choice for boundary conditions type per variables~~
 
 2. ~~adding a `path_conservative=True/False` option for faster solving easier systems~~
 

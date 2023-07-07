@@ -21,10 +21,14 @@ W0[-1, :] = - (U_L[0] + U_L[2])
 
 Z = W0[-1, :]
 
+# ## Boundary conditions
+BCs = [['symmetry', 'symmetry'], [0, 0],
+       ['symmetry', 'symmetry'], [0, 0]]
+
 # ## Initialization
 model = SW2LLayerwise()  # model with default parameters
 simu = Simulation(
-    model, W0, dx, spatial_scheme='CentralUpwindPathConservative')  # simulation
+    model, W0, BCs, dx, spatial_scheme='CentralUpwindPathConservative')  # simulation
 
 # %% Run model
 U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)

@@ -16,13 +16,6 @@ dx = L/(Nx - 1)
 # Bottom topography
 Z = 0*x
 
-# layer
-hmin = 1e-10
-l0 = 5
-h0 = 0.5
-#
-h = hmin*np.ones_like(x) + np.where(x <= l0, h0, 0)  # window
-
 # layers
 hmin = 1e-10
 l0 = 0.3
