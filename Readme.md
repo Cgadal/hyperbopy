@@ -1,6 +1,6 @@
-# shallowpy
+# hyperbopy
 
-The `shallowpy` module allows solving 1D non-conservative hyperbolic systems of equations of the form:
+The `hyperbopy` module allows solving 1D non-conservative hyperbolic systems of equations of the form:
 
 ```math
 
@@ -20,13 +20,13 @@ The numerical schemes are:
 
 ## Usage
 
-Here, we show how to solve the one-layer shallow water equations already implemented in `shallowpy`. More examples are available in the `reference_cases` directory.
+Here, we show how to solve the one-layer shallow water equations already implemented in `hyperbopy`. More examples are available in the `reference_cases` directory.
 
 ```python
 import numpy as np
 
-from shallowpy import Simulation
-from shallowpy.models import SW1LGlobal
+from hyperbopy import Simulation
+from hyperbopy.models import SW1LGlobal
 
 # ## Domain size
 L = 10   # domain length [m]
@@ -173,12 +173,12 @@ N &= \left[ [h^{2}]_{t}\left( h [u]_{x} - [Z]_{x} u \right)   \right]_{x} + 2[Z]
 
 ## Custom models
 
-To use a custom model, you need to create a class that implements as methods the matrices used by the wanted spatial scheme. The easiest would be to copy an already implemented models in `shallowpy.models`, and modify it with the appropriate fluxes, sources, etc ...
+To use a custom model, you need to create a class that implements as methods the matrices used by the wanted spatial scheme. The easiest would be to copy an already implemented models in `hyperbopy.models`, and modify it with the appropriate fluxes, sources, etc ...
 
 ## Installation
 
 - Clone or download this repository
-- `cd shallowpy`
+- `cd hyperbopy`
 - `pip3 install -e ./` (editable mode installation)
 
 
@@ -206,8 +206,10 @@ To use a custom model, you need to create a class that implements as methods the
 
 ## Changelog
 
-- **07/07/02023**: version: 0.1.1
+- **07/07/02023**: version: 0.1.2
   - Reworking code, creating new classes for spatial schemes, temporal schemes, plotting, and starting simulation
+  - Changing name to hyperbopy
+  - implementing custom boundary conditions
 
 - **04/07/02023**: version: 0.1.0
   - Reworking all code, separating model definition, spatial scheme and temporal scheme. 

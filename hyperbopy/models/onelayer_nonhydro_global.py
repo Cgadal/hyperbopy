@@ -27,7 +27,7 @@ REFERENCE: Chertock, A., Kurganov, A., & Liu, Y. (2020). Finite-volume-particle 
 
 import numpy as np
 
-from shallowpy.core.spatial_scheme import reconstruct_u
+from hyperbopy.core.spatial_scheme import reconstruct_u
 
 from .basemodel import BaseModel
 

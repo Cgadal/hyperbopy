@@ -21,7 +21,7 @@ REFERENCE: Diaz, M. J. C., Kurganov, A., & de Luna, T. M. (2019). Path-conservat
 
 import numpy as np
 
-from shallowpy.core.spatial_scheme import reconstruct_u
+from hyperbopy.core.spatial_scheme import reconstruct_u
 
 from .basemodel import BaseModel
 

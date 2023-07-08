@@ -1,7 +1,7 @@
 import numpy as np
 
-from shallowpy import Simulation
-from shallowpy.models import SW1LNonhydroGlobal
+from hyperbopy import Simulation
+from hyperbopy.models import SW1LLocal
 
 # ## Domain size
 L = 10   # domain length [m]
@@ -13,11 +13,11 @@ x = np.linspace(0, L, Nx)
 dx = L/(Nx - 1)
 
 # injection properties
-q0 = 0.5
-h0 = 3
+q0 = 2
+h0 = 0.5
 
 # ## Initial condition
-# Bottom topography
+# Bottom topographySW1LLocal
 Z = 0*x
 
 # layer
@@ -35,9 +35,8 @@ W0 = np.array([h, q, Z])
 BCs = [[h0, 'symmetry'], [q0, 'symmetry']]
 
 # ## Initialization
-model = SW1LNonhydroGlobal(a_N=0.05, a_M=0.05)
-simu = Simulation(model, W0, BCs, dx, temporal_scheme='RungeKutta33',
-                  spatial_scheme='CentralUpwindPathNoneHydro')  # simulation
+model = SW1LLocal()  # model with default parameters
+simu = Simulation(model, W0, BCs, dx)  # simulation
 
 # %% Run model
 U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)

@@ -1,8 +1,8 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from shallowpy import Simulation
-from shallowpy.models import SW2LLayerwise
+from hyperbopy import Simulation
+from hyperbopy.models import SW2LLayerwise
 
 # ## Grid parameters
 Nx = 1000

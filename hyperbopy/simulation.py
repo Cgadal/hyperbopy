@@ -1,9 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-from shallowpy.core.spatial_scheme import available_spatial_schemes
-from shallowpy.core.temporal_schemes import available_temporal_schemes
-from shallowpy.core.graphics import SimuFigure
+from hyperbopy.core.spatial_scheme import available_spatial_schemes
+from hyperbopy.core.temporal_schemes import available_temporal_schemes
+from hyperbopy.core.graphics import SimuFigure
 
 # ### main run function
 

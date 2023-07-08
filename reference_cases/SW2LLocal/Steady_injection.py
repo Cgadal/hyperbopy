@@ -1,7 +1,7 @@
 import numpy as np
 
-from shallowpy import Simulation
-from shallowpy.models import SW2LLayerwise
+from hyperbopy import Simulation
+from hyperbopy.models import SW2LLocal
 
 # ## Domain size
 L = 10   # domain length [m]
@@ -39,7 +39,7 @@ BCs = [['symmetry', 'symmetry'], [0, 'symmetry'],
        [h0, 'symmetry'], [q0, 'symmetry']]
 
 # ## Initialization
-model = SW2LLayerwise()  # model with default parameters
+model = SW2LLocal()  # model with default parameters
 simu = Simulation(
     model, W0, BCs, dx, spatial_scheme='CentralUpwindPathConservative')  # simulation
 

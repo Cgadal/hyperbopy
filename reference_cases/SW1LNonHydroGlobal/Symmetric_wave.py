@@ -1,7 +1,7 @@
 import numpy as np
 
-from shallowpy import Simulation
-from shallowpy.models import SW1LNonhydroGlobal
+from hyperbopy import Simulation
+from hyperbopy.models import SW1LNonhydroGlobal
 
 # ## Domain size
 L = 3   # domain length [m]
