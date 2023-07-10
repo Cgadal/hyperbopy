@@ -1,9 +1,9 @@
-import matplotlib.pyplot as plt
 import numpy as np
 
+from hyperbopy.core.boundary_conditions import BoundaryConditions
+from hyperbopy.core.graphics import SimuFigure
 from hyperbopy.core.spatial_scheme import available_spatial_schemes
 from hyperbopy.core.temporal_schemes import available_temporal_schemes
-from hyperbopy.core.graphics import SimuFigure
 
 # ### main run function
 
@@ -19,11 +19,14 @@ class Simulation:
         self.dx = dx
         self.dt_fact = dt_fact if dt_fact is not None else 0.5
         #
-        self.euler_step = 'nonhydro' if self.spatial_scheme_name == 'CentralUpwindPathNoneHydro' else 'regular'
+        # #### SpatialScheme
         self.SpatialScheme = available_spatial_schemes[self.spatial_scheme_name](
             self.model)
+        # #### TemporalScheme
+        self.euler_step = 'nonhydro' if self.spatial_scheme_name == 'CentralUpwindPathNoneHydro' else 'regular'
+        self.BoundaryConditions = BoundaryConditions(self.BCs)
         self.TemporalScheme = available_temporal_schemes[self.temporal_scheme_name](
-            self.model, self.SpatialScheme, self.dt_fact, self.BCs)
+            self.model, self.SpatialScheme, self.dt_fact, self.BoundaryConditions)
 
     def run_simulation(self, tmax, plot_fig=True, dN_fig=200, dt_save=None, x=None, Z=None):
         #

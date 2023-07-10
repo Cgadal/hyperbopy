@@ -6,8 +6,6 @@ Temporal discretization
 import numpy as np
 from scipy.linalg import solve_banded
 
-from .boundary_conditions import BoundaryConditions
-
 available_temporal_schemes = {}
 
 
@@ -19,13 +17,11 @@ def register_temporal_scheme(CustomTemporalScheme):
 
 class EulerBase():
 
-    def __init__(self, model, spatial_scheme, dt_fact, BCs):
+    def __init__(self, model, spatial_scheme, dt_fact, BoundaryConditions):
         self.model = model
         self.SpatialScheme = spatial_scheme
         self.dt_fact = dt_fact
-        self.BCs = BCs
-        #
-        self.BoundaryConditions = BoundaryConditions(self.BCs)
+        self.BoundaryConditions = BoundaryConditions        #
 
     def _euler_step_regular(self, W, dx, dt=None):
         RHS, dtmax = self.SpatialScheme.compute_RHS(W, dx)
