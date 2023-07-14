@@ -32,10 +32,14 @@ q1, q2 = np.zeros_like(x), np.zeros_like(x)
 
 W0 = np.array([h1, q1, h2, q2, Z])
 
+# ## Boundary conditions
+BCs = [['symmetry', 'symmetry'], [0, 'symmetry'],
+       [h0, 'symmetry'], [0, 'symmetry']]
+
 # ## Initialization
 model = SW2LLocal()  # model with default parameters
 simu = Simulation(
-    model, W0, dx, spatial_scheme='CentralUpwindPathConservative')  # simulation
+    model, W0, BCs, dx, spatial_scheme='CentralUpwindPathConservative')  # simulation
 
 # %% Run model
 U, t = simu.run_simulation(tmax, plot_fig=True, dN_fig=50, x=x, Z=Z)
